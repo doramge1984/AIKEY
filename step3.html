@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A.I라는 키 · STEP 3 GEM 챗봇 만들기</title>
+<style>
+  :root{
+    --gold:#bfa05f; --gold-soft:#d9c79b; --gold-bg:#f7f2e7;
+    --navy:#23303f; --navy2:#33475c; --ink:#2c333b; --gray:#6b7480;
+    --line:#e7e3da; --bg:#f6f6f4; --code:#26303c; --grid:#e9eef3;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;color:var(--ink);background:var(--bg);line-height:1.7;padding-top:58px;font-size:25px;
+    font-family:"Malgun Gothic","맑은 고딕",-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;}
+  a{color:var(--navy2)}
+  p,li{font-size:25px;}
+  .topbar{position:fixed;top:0;left:0;right:0;height:58px;z-index:200;display:flex;align-items:center;
+    justify-content:space-between;padding:0 22px;background:rgba(255,255,255,.93);
+    backdrop-filter:blur(8px);border-bottom:1px solid var(--line);box-shadow:0 1px 8px rgba(35,48,63,.05);}
+  .tb-brand{font-weight:800;color:var(--navy);text-decoration:none;font-size:17px;}
+  .tb-brand span{color:var(--gold);}
+  .tb-links{display:flex;gap:5px;flex-wrap:wrap;align-items:center;}
+  .tb-links a{font-size:13px;color:var(--ink);text-decoration:none;padding:7px 10px;border:1px solid var(--gold-soft);border-radius:7px;font-weight:600;}
+  .tb-links a:hover{background:var(--gold-bg);color:var(--navy);}
+  .tb-links a.active{color:#fff;background:var(--gold);}
+  .wrap{display:flex;max-width:1480px;margin:0 auto;}
+  nav.toc{position:sticky;top:58px;align-self:flex-start;width:284px;height:calc(100vh - 58px);
+    padding:30px 16px;border-right:1px solid var(--line);background:#fbfaf8;overflow-y:auto;flex:none;margin-right:38px;}
+  nav.toc .brand{font-size:28px;font-weight:800;color:var(--navy);}
+  nav.toc .brand span{color:var(--gold)}
+  nav.toc .sub{font-size:18px;color:var(--gray);margin-bottom:18px;}
+  nav.toc .divider{height:1px;background:var(--gold-soft);margin:0 0 16px;}
+  nav.toc h2{font-size:18px;color:var(--gold);font-weight:800;letter-spacing:.06em;margin:0 0 10px;}
+  nav.toc a{display:block;padding:8px 12px;border:1px solid var(--line);background:#fff;border-radius:9px;color:var(--navy2);text-decoration:none;font-size:18px;margin-bottom:6px;transition:border-color .12s,background .12s;}
+  nav.toc a:hover{border-color:var(--gold);background:var(--gold-bg);color:var(--navy);}
+  main{flex:1;min-width:0;padding:0 0 80px;}
+  header.hero{position:relative;overflow:hidden;padding:54px 22px 48px;border-bottom:3px solid var(--gold);background:
+      repeating-linear-gradient(0deg,rgba(255,255,255,.03) 0 1px,transparent 1px 42px),
+      repeating-linear-gradient(90deg,rgba(255,255,255,.03) 0 1px,transparent 1px 42px),
+      radial-gradient(ellipse at 28% 22%, #2d3f58 0%, #1c2836 55%, #131b25 100%);}
+  header.hero::before{content:"";position:absolute;top:-34%;left:4%;width:520px;max-width:72%;height:360px;border-radius:50%;
+    background:radial-gradient(ellipse,rgba(191,160,95,.26),rgba(191,160,95,.07) 45%,transparent 72%);filter:blur(10px);pointer-events:none;animation:auraGlow 4.5s ease-in-out infinite;}
+  header.hero > *{position:relative;z-index:1;}
+  header.hero .keyicon{font-size:36px;color:#e7cf95;filter:drop-shadow(0 0 14px rgba(214,184,110,.6));animation:goldGlow 3.6s ease-in-out infinite;}
+  header.hero .tag{display:inline-block;border:1px solid rgba(217,199,155,.45);color:#ecdcb2;background:rgba(255,255,255,.06);padding:6px 15px;border-radius:999px;font-size:19px;margin-bottom:16px;}
+  header.hero h1{margin:0;font-size:40px;line-height:1.22;font-weight:800;letter-spacing:-.01em;
+    background:linear-gradient(180deg,#fbeec2,#ecd396 40%,#c8a865 70%,#a07f3d);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
+    filter:drop-shadow(0 2px 14px rgba(191,160,95,.5));}
+  header.hero h1 span{color:#b4c0cd !important;-webkit-text-fill-color:#b4c0cd !important;font-size:20px !important;}
+  .hr-gold{width:74px;height:2px;margin:18px 0;border:0;background:linear-gradient(90deg,var(--gold),transparent);box-shadow:0 0 12px rgba(191,160,95,.7);}
+  header.hero .meta{font-size:23px;color:#cdd6e2;}
+  header.hero .meta b{color:#ecdcb2}
+  section{padding:64px 22px;border-bottom:1px solid var(--line);border-top:3px solid var(--gold-soft);}
+  section:nth-of-type(even){background:#fbfaf7;} section:nth-of-type(odd){background:#fff;} #intro{background:#f4f1ea;}
+  .step-badge{display:inline-block;font-size:25px;font-weight:800;letter-spacing:.14em;color:#fff;
+    background:var(--gold);padding:6px 16px;border-radius:999px;margin-bottom:14px;box-shadow:0 2px 6px rgba(191,160,95,.3);}
+  section h3{font-size:41px;margin:0 0 6px;color:var(--navy);font-weight:800;line-height:1.25;}
+  .underline{width:46px;height:2px;background:var(--gold-soft);margin:0 0 16px;}
+  section h4{font-size:30px;margin:24px 0 8px;color:var(--navy);font-weight:700;}
+  .lead{font-size:28px;color:var(--gray)}
+  .callout{border-radius:10px;padding:16px 20px;margin:16px 0;font-size:24px;background:#fff;}
+  .tip{background:var(--gold-bg);border-left:4px solid var(--gold);}
+  .warn{background:#fbf3f1;border-left:4px solid #d99a86;}
+  .callout b{color:var(--navy)}
+  .linkrow{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0;}
+  .btn{display:inline-flex;align-items:center;gap:8px;background:var(--navy);color:#fff;text-decoration:none;
+    padding:12px 20px;border-radius:9px;font-size:24px;font-weight:600;box-shadow:0 3px 8px rgba(35,48,63,.18);}
+  .btn:hover{background:#16212e;} .btn.gold{background:var(--gold);} .btn.gold:hover{background:#ab8e4d;}
+  ul.steps{list-style:none;padding:0;margin:14px 0;counter-reset:s;}
+  ul.steps li{position:relative;padding:14px 14px 14px 52px;border:1px solid var(--line);border-radius:10px;margin-bottom:9px;background:#fff;font-size:24px;}
+  ul.steps li:before{counter-increment:s;content:counter(s);position:absolute;left:14px;top:16px;
+    width:28px;height:28px;border-radius:50%;background:var(--navy);color:#fff;font-size:15px;display:flex;align-items:center;justify-content:center;font-weight:700;}
+  .promptbox{position:relative;background:var(--code);color:#e8edf3;border-radius:11px;padding:22px 20px 20px;margin:14px 0;font-size:23px;}
+  .promptbox .label{font-size:19px;color:#9fb0c0;letter-spacing:.04em;margin-bottom:10px;font-weight:700;}
+  .promptbox pre{margin:0;white-space:pre-wrap;word-break:break-word;font-family:"Consolas","Malgun Gothic",monospace;line-height:1.7;font-size:22px;}
+  .copybtn{position:absolute;top:14px;right:14px;background:var(--gold);color:#fff;border:0;border-radius:7px;padding:7px 15px;font-size:19px;cursor:pointer;font-weight:700;}
+  .copybtn:hover{background:#ab8e4d;} .copybtn.done{background:#5a8a5a;}
+  details.toggle{border:2px solid var(--gold-soft);border-radius:12px;margin:16px 0;overflow:hidden;background:#fff;}
+  details.toggle summary{cursor:pointer;list-style:none;padding:16px 20px;font-size:23px;font-weight:800;color:var(--navy);background:var(--gold-bg);display:flex;align-items:center;gap:11px;}
+  details.toggle summary::-webkit-details-marker{display:none;}
+  details.toggle summary::before{content:"▶";color:var(--gold);font-size:18px;transition:transform .2s;}
+  details.toggle[open] summary::before{transform:rotate(90deg);}
+  details.toggle .tgbody{padding:8px 20px 18px;}
+  footer{padding:28px 22px;color:var(--gray);font-size:20px;}
+  footer .gline{height:1px;background:var(--gold-soft);margin-bottom:14px;}
+  @keyframes goldGlow{0%,100%{filter:drop-shadow(0 2px 12px rgba(191,160,95,.35));}50%{filter:drop-shadow(0 2px 24px rgba(224,195,122,.65));}}
+  @keyframes auraGlow{0%,100%{opacity:.5;}50%{opacity:.9;}}
+  @media(max-width:860px){ nav.toc{display:none} }
+  @media(max-width:720px){ .topbar{height:auto;flex-direction:column;align-items:flex-start;gap:6px;padding:8px 16px;} body{padding-top:120px;} }
+  @media(min-width:861px){ header.hero{padding-left:50px;} main section{padding-left:50px;} }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a class="tb-brand" href="index.html">A.<span>I</span>라는 키</a>
+  <nav class="tb-links">
+    <a href="index.html">🏠 홈</a>
+    <a href="step1.html">STEP 1 · 환경세팅</a>
+    <a href="step2.html">STEP 2 · 할루시네이션·RAG</a>
+    <a class="active" href="step3.html">STEP 3 · GEM 챗봇</a>
+    <a href="step4.html">STEP 4 · 노트북LM 기본</a>
+    <a href="step5.html">STEP 5 · 노트북LM 실습</a>
+    <a href="step6.html">STEP 6 · 프롬프트</a>
+    <a href="gift.html">🎁 선물</a>
+  </nav>
+</div>
+
+<div class="wrap">
+  <nav class="toc">
+    <div class="divider"></div>
+    <h2>STEP 3 · GEM 챗봇</h2>
+    <a href="#intro">들어가기</a>
+    <a href="#s1">1. Gems vs 일반 채팅</a>
+    <a href="#s2">2. 3분 만에 Gem 생성</a>
+    <a href="#s3" style="background:var(--gold);color:#fff;font-weight:800">3. 복사용 마스터 프롬프트</a>
+    <a href="#s4">4. 젬 챗봇 캔버스 웹앱</a>
+    <a href="#s5">✅ 마무리</a>
+  </nav>
+
+  <main>
+    <header class="hero">
+      <div class="keyicon">💎</div>
+      <h1>STEP 3 · GEM 챗봇 만들기 <span style="font-size:19px;color:var(--gray);font-weight:600;">— 내 업무를 학습한 '디지털 부사수' 구축</span></h1>
+      <hr class="hr-gold">
+      <p class="meta">매번 긴 프롬프트와 지침을 입력하기 번거로우셨죠? 자주 쓰는 역할과 규정을 고정해 두고, 데이터만 던지면 알아서 일하는 <b>나만의 맞춤형 업무 비서(Gem)</b>를 만듭니다.</p>
+    </header>
+
+    <section id="intro">
+      <div class="step-badge" style="margin-top:150px">START</div>
+      <h3>이번 STEP에서 배우는 것</h3>
+      <div class="underline"></div>
+      <p class="lead"><b>Gem(Gems)</b>이 무엇인지 이해하고, STEP 2에서 배운 <b>RAG</b> 개념을 녹여낸 실전 업무용 맞춤 챗봇을 직접 생성하고 테스트해 봅니다.</p>
+      <div class="linkrow"><a class="btn gold" href="https://gemini.google.com/gems/create" target="_blank" rel="noopener">💎 Gem 만들기 열기</a><a class="btn" href="https://gemini.google.com" target="_blank" rel="noopener">✨ 제미나이 바로가기</a></div>
+    </section>
+
+    <section id="s1">
+      <div class="step-badge">1</div>
+      <h3>Gems <span style="color:var(--gray);font-size:24px">vs</span> 일반 채팅, 무엇이 다를까?</h3>
+      <div class="underline"></div>
+      <table style="width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 8px 22px rgba(191,160,95,.2);font-size:21px;margin:16px 0;">
+        <tr>
+          <th style="background:linear-gradient(135deg,#c6a766,#a8893f);color:#fff;padding:14px 16px;text-align:left;width:16%">항목</th>
+          <th style="background:linear-gradient(135deg,#c6a766,#a8893f);color:#fff;padding:14px 16px;text-align:left">🟦 Gemini 일반 채팅</th>
+          <th style="background:linear-gradient(135deg,#c6a766,#a8893f);color:#fff;padding:14px 16px;text-align:left">💎 Gemini Gems (맞춤형 챗봇)</th>
+        </tr>
+        <tr>
+          <td style="padding:13px 16px;border-bottom:1px solid #f1ebda;font-weight:800;color:var(--navy);white-space:nowrap">기억력</td>
+          <td style="padding:13px 16px;border-bottom:1px solid #f1ebda">새 대화방을 열면 이전 지침을 <span style="color:#e53935;font-weight:800">모두 잊음</span></td>
+          <td style="padding:13px 16px;border-bottom:1px solid #f1ebda"><span style="color:#e53935;font-weight:800">역할과 행정 규정이 방 자체에 평생 고정</span>됨</td>
+        </tr>
+        <tr>
+          <td style="padding:13px 16px;border-bottom:1px solid #f1ebda;font-weight:800;color:var(--navy);white-space:nowrap">입력 방식</td>
+          <td style="padding:13px 16px;border-bottom:1px solid #f1ebda">매번 "너는 공무원이야, 정중하게 해줘"라며 길게 설명해야 함</td>
+          <td style="padding:13px 16px;border-bottom:1px solid #f1ebda"><span style="color:#e53935;font-weight:800">알맹이 데이터(행사 내용, 공문 초안)만 툭 던지면 끝</span></td>
+        </tr>
+        <tr>
+          <td style="padding:13px 16px;font-weight:800;color:var(--navy);white-space:nowrap">추천 활용</td>
+          <td style="padding:13px 16px">일회성 정보 검색, 단순 아이디어 브레인스토밍</td>
+          <td style="padding:13px 16px">보도자료 작성, 공문서 검수, 법령 및 지침서 상담</td>
+        </tr>
+      </table>
+    </section>
+
+    <section id="s2">
+      <div class="step-badge">2</div>
+      <h3>⚡ 3분 만에 만드는 <span style="color:var(--gold)">Gem 생성 프로세스</span></h3>
+      <div class="underline"></div>
+      <div class="callout tip">💡 <b>핵심 요약</b> — Gems는 복잡한 프롬프트를 매번 타이핑할 필요 없이, AI에게 <b>"너는 앞으로 이 규칙대로만 움직여"</b>라고 감옥을 만들어 두는 기능입니다.</div>
+      <ul class="steps">
+        <li>제미나이 접속 후 좌측 메뉴에서 <b>[Gems 관리]</b> 또는 <b>[새 Gem 만들기]</b> 버튼을 클릭합니다.<img src="./images/gem-instructions-star.png" alt="새 Gem 만들기 화면 — 이름·설명·요청 사항(지침)·지식(파일 추가)" style="display:block;width:100%;max-width:1100px;margin:16px auto 4px;border:3px solid var(--gold);border-radius:14px;box-shadow:0 12px 28px rgba(191,160,95,.24);"></li>
+        <li>챗봇의 <b>이름과 아이콘</b>을 설정합니다. (예: 📝 보도자료 초안 작성기)</li>
+        <li>가장 중요한 <b>'지침(Instructions)'</b> 칸에 아래의 완성형 템플릿을 복사해서 붙여넣고 저장합니다.<img src="./images/gem-create-screen.png" alt="새 Gem 만들기 화면 — 요청 사항(지침) 입력 칸 위치" style="display:block;width:100%;max-width:1100px;margin:16px auto 4px;border:3px solid var(--gold);border-radius:14px;box-shadow:0 12px 28px rgba(191,160,95,.24);"></li>
+      </ul>
+      <div class="linkrow"><a class="btn gold" href="https://gemini.google.com/gems/create" target="_blank" rel="noopener">💎 Gem 만들기 열기</a><a class="btn" href="https://gemini.google.com" target="_blank" rel="noopener">✨ 제미나이 바로가기</a></div>
+    </section>
+
+    <section id="s3">
+      <div class="step-badge">3</div>
+      <h3>📋 [복사] 행정 업무별 <span style="color:var(--gold)">Gem 프롬프트 마스터</span></h3>
+      <div class="underline"></div>
+      <p>현업으로 돌아가 가장 유용하게 쓸 수 있는 대표적인 업무용 지침입니다. 아래 내용을 <b>[복사]</b>하여 내 Gem의 알맞은 칸에 그대로 넣으세요.</p>
+
+      <h4 style="margin-top:100px">💡 예시: [실장님 맞춤] 학교 회계·계약 최종 승인관 <span style="font-size:21px;color:var(--gray)">(최종 결재 안심 비서)</span></h4>
+
+      <details class="toggle">
+        <summary>🔍 어떤 챗봇인가요? — 클릭하면 자세한 설명을 볼 수 있어요.</summary>
+        <div class="tgbody">
+          <p style="margin:0 0 12px;font-size:18px;line-height:1.6"><b>목적</b> — 학교 행정실의 핵심인 '예산·회계·계약'에서 실장으로서 <b>최종 결재(검토)</b>할 때, 누락이나 법적 오류가 없는지 검증해 주는 챗봇입니다.</p>
+          <ul class="steps" style="margin:0 0 12px">
+            <li style="font-size:17px;padding:10px 12px 10px 44px;line-height:1.55"><b>계약 검토기</b> — "실장님, 주차장 포장공사(수의계약) 결재 올리기 전에 이 3가지는 확인하셨나요?" <span style="color:var(--gray);font-size:15px">(여성기업 수의계약 범위, 공사대장 등재 여부 등 체크리스트 제공)</span></li>
+            <li style="font-size:17px;padding:10px 12px 10px 44px;line-height:1.55"><b>예산 편성·결산 자문</b> — 추가경정예산 편성 시기나 결산 시 항목 분류가 적절한지 매뉴얼 기반 실시간 답변.</li>
+            <li style="font-size:17px;padding:10px 12px 10px 44px;line-height:1.55"><b>감사 지적 사례 매칭</b> — "이 지출 건은 과거 감사에서 자주 지적되던 유형입니다. 증빙 서류로 OO을 더 첨부하도록 지시하세요"라고 조언.</li>
+          </ul>
+          <p style="margin:0;font-size:18px">📢 <b>추천 슬로건</b> — <span style="color:#e53935;font-weight:800">"실장님, 도장 찍으시기 전에 저한테 먼저 물어보세요!"</span></p>
+        </div>
+      </details>
+
+      <h4 style="font-size:25px;color:var(--gold);margin-top:100px">📝 1. 챗봇 이름 및 설명 (Name &amp; Description)</h4>
+      <div class="promptbox"><div class="label">📋 복사용 이름</div><button class="copybtn">복사</button>
+<pre>학교 회계·계약 최종 승인관</pre></div>
+      <div class="promptbox"><div class="label">📋 복사용 설명</div><button class="copybtn">복사</button>
+<pre>👋 반갑습니다, 실장님! 도장 찍으시기 전에 저에게 먼저 검증받으세요.
+아래와 같이 질문하시면 가장 정확한 답을 얻으실 수 있습니다:
+
+1. "추정가격 [OO원]짜리 [공사/물품] 수의계약 결재 검토해 줘."
+2. "[목적사업비 명칭] 예산이 왔는데 성립전 예산 사용이 가능할까?"
+3. "출장여비와 시간외수당 이중지급 여부 확인해 줘."
+결재 문서의 본문이나 특이사항을 그대로 복사해서 붙여넣으셔도 감사 지적 사례를 매칭해 드립니다!</pre></div>
+
+      <h4 style="font-size:25px;color:var(--gold)">🤖 2. 챗봇 지침 (Instructions)</h4>
+      <div class="promptbox"><div class="label">📋 복사용 지침</div><button class="copybtn">복사</button>
+<pre># 역할 및 정체성
+너는 경기도교육청 소속 학교의 신임 6급 행정실장(중간관리자)을 보좌하는 'AI 수석 행정관'이자 '최종 결재 안심 검증 비서'야. 사용자가 주무관들이 올린 예산, 회계, 지출, 계약 결재 문서의 내용이나 초안을 입력하면, 법적 오류나 감사 지적 요인이 없는지 날카롭게 검증해 주는 역할을 해.
+
+# 핵심 행동 원칙 및 지식 근거 조건 (필수)
+1. 철저한 파일 근거(RAG) 기반 답변: 너는 반드시 업로드된 파일(학교 업무매뉴얼, 지방자치단체 계약 집행기준, 감사 사례집 등 지식 창고 데이터)에만 근거하여 답변해야 해. 파일에 없는 내용을 임의로 추정하거나 외부 지식(학습 데이터)을 활용해 답변해서는 절대 안 돼. 만약 업로드된 파일 내에서 명확한 근거를 찾을 수 없다면, 억지로 답변을 꾸며내지 말고 "현재 업로드된 데이터 내에서는 해당 기준을 확인할 수 없습니다"라고 정직하게 안내해야 해.
+2. 실장님 맞춤 격식체 사용: 신임 실장님들의 중압감을 덜어주기 위해 항상 "실장님, 이 건은 ~를 확인하셔야 안전합니다."와 같이 정중하고 확신에 찬 어조를 사용해.
+3. 3대 기능 중심 답변:
+   - [계약 검토기]: 계약 건(공사, 물품, 용역) 입력 시 추정가격에 따른 계약 방법(인터넷 견적 제출, 2인 수의 등)이 적법한지, 공공기관 의무구매 비율이나 경기도청 수의계약 횟수 제한에 걸리지 않는지 체크리스트를 제공해 줘.
+   - [예산·결산 자문]: 추경 편성 시기, 성립전 예산 사용 가능 여부, 간주처리 예산 가능 항목(목적지정재원 여부)을 매뉴얼에 기반해 실시간 자문해 줘.
+   - [감사 지적 매칭]: 해당 지출 건과 유사한 과거 경기도교육청 감사 지적 사례를 매칭하여 "이 건은 증빙서류로 OO이 누락되면 감사에 지적됩니다"라고 방어해 줘.
+4. 구체적 출처 명시: 답변의 신뢰도를 위해 반드시 파일 내에 명시된 "지자체 계약 집행기준 제O장" 또는 "학교 업무매뉴얼 O페이지" 등 구체적인 출처 문구와 페이지를 함께 제시해 줘.
+
+# 답변 출력 스타일 (템플릿)
+실장님이 문서를 올리거나 질문하면 항상 아래 구조로 답변해 줘.
+
+📋 안심 결재 검증 결과
+(해당 건의 적법성 여부를 통과/주의/반려 등으로 직관적 요약)
+
+🔍 실장님 확인 필수 체크리스트
+1. (법적 기준 확인 사항)
+2. (K-에듀파인 조작 시 주의점)
+3. (추가로 징구해야 할 증빙 서류)
+
+⚠️ 과거 감사 지적 유사 사례
+- 지적 유형: (예: 수의계약 쪼개기, 집행잔액 반납 누락 등)
+
+💡 실장님의 한 마디: "주무관에게 결재를 반려하시고, [OO 서류]를 보완해 오라고 지시하시는 것이 안전합니다."
+
+📌 근거 자료 출처
+- (예: 2026 학교 업무매뉴얼 행정편 O페이지 / 지방자치단체 입찰 및 계약 집행기준 제O장)</pre></div>
+
+      <h4 style="font-size:25px;color:var(--gold);margin-top:100px">📂 3. 지식 창고 설정 (RAG 파일 업로드)</h4>
+      <div class="callout tip">실장님들이 진짜 필요로 하는 <b>법적 한도</b>와 <b>감사 지적 사례</b>를 잡기 위해 아래 파일들을 Gem 생성 시 <b>[파일 첨부]</b>로 꼭 함께 업로드해주세요.</div>
+      <div class="linkrow"><a class="btn" style="background:#e53935" href="https://drive.google.com/drive/folders/1YSEXWm8kxJoXqJOWxD9lhLOmwDUXycls?usp=sharing" target="_blank" rel="noopener">📁 자료 파일 구글드라이브 열기</a></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0;">
+        <div style="background:#fff;border:1px solid var(--gold-soft);border-left:6px solid var(--gold);border-radius:12px;padding:16px 20px;box-shadow:0 4px 12px rgba(191,160,95,.12)"><span style="font-size:24px">📄</span> <b>2026 학교 업무매뉴얼 행정(최종).pdf</b><br><span style="color:var(--gray);font-size:19px">기본 프로세스 학습용</span></div>
+        <div style="background:#fff;border:1px solid var(--gold-soft);border-left:6px solid var(--gold);border-radius:12px;padding:16px 20px;box-shadow:0 4px 12px rgba(191,160,95,.12)"><span style="font-size:24px">📄</span> <b>지방자치단체 입찰 및 계약 집행기준 (최신판 예규)</b><br><span style="color:var(--gray);font-size:19px">수의계약 한도 및 원본 기준 법령</span></div>
+        <div style="background:#fff;border:1px solid var(--gold-soft);border-left:6px solid var(--gold);border-radius:12px;padding:16px 20px;box-shadow:0 4px 12px rgba(191,160,95,.12)"><span style="font-size:24px">📄</span> <b>경기도교육청 계약업무 개선사항 공문 및 클린계약 운영계획</b><br><span style="color:var(--gray);font-size:19px">자체 수의계약 횟수 제한 확인용</span></div>
+        <div style="background:#fff;border:1px solid var(--gold-soft);border-left:6px solid var(--gold);border-radius:12px;padding:16px 20px;box-shadow:0 4px 12px rgba(191,160,95,.12)"><span style="font-size:24px">📄</span> <b>경기도교육청 자체 감사 지적 사례집 (최신 2~3개년)</b><br><span style="color:var(--gray);font-size:19px">여비, 수당, 쪼개기 계약 등 실전 방어용</span></div>
+      </div>
+
+      <div style="background:#fdf3f2;border:2px solid #f1c8c2;border-radius:16px;padding:24px 28px;margin-top:125px">
+        <h4 style="font-size:25px;color:var(--gold);margin:0 0 12px">🧪 4. 실습 테스트 입력 예시</h4>
+        <div class="callout warn">🏗️ <b>계약 검토</b> — "우리 학교 본관 화장실 보수공사를 추정가격 4,500만 원에 진행하려고 해. 여성기업이 아닌 일반 업체와 수의계약(지정정보장치 미이용)으로 체결하는 것이 법적으로 가능해? 안 된다면 결재를 어떻게 반려해야 하지?"</div>
+        <div class="callout warn">💰 <b>예산·추경</b> — "교육청에서 '디지털 교과서 활성화 사업'으로 목적지정재원 500만 원이 오늘 교부되었어. 당장 다음 주에 집행해야 한다는데, 학교운영위원회 심의를 거치지 않고 '성립전 예산'으로 바로 집행 결재를 승인해도 괜찮을까?"</div>
+        <div class="callout warn">💳 <b>지출·복무</b> — "교무실 주무관이 주말에 학교 축제 지원으로 출장을 다녀왔다며 '출장여비'와 '시간외근무수당'을 둘 다 신청했어. 이거 이중지급으로 감사 지적 대상 아니야? 어떻게 처리하는 게 맞는지 기준을 알려줘."</div>
+      </div>
+    </section>
+
+    <section id="s4">
+      <div class="step-badge">4</div>
+      <h3>젬 챗봇 <span style="color:var(--gold)">캔버스 웹앱 버전</span> <span style="font-size:22px;color:var(--gray)">(참고로 구경만 해볼까요?)</span></h3>
+      <div class="underline"></div>
+      <p>이 웹앱은 학교 행정 현장에서 가장 빈번하게 발생하는 <b>사업 형태별 금액 기준(추정가격 vs 예정가격)</b>, 계약 상대자 조건(여성/장애인/사회적 기업 등)을 실시간으로 조합하여, 어떤 <b>지정정보처리장치(S2B, G2B, eaT, 온비드)</b>를 사용해야 하는지와 <b>법적 계약 방법(1인 수의, 2인 소액수의, 일반입찰 등)</b>을 완벽하게 가이드해주는 웹앱입니다.</p>
+      <div class="linkrow"><a class="btn gold" href="https://gemini.google.com/share/dac08fef5996" target="_blank" rel="noopener">🖥️ 캔버스 웹앱 구경하기</a></div>
+      <a href="https://gemini.google.com/share/dac08fef5996" target="_blank" rel="noopener"><img src="./images/gem-canvas-webapp.png" alt="학교 지정정보처리장치 & 수의계약 판별기 캔버스 웹앱 화면" style="display:block;width:100%;max-width:1000px;margin:8px auto 20px;border:3px solid var(--gold);border-radius:14px;box-shadow:0 12px 28px rgba(191,160,95,.24);cursor:pointer"></a>
+      <h4 style="font-size:25px;color:var(--gold)">주요 기능</h4>
+      <ul class="steps">
+        <li><b>VAT 포함/제외 자동 계산기</b> — 실무진이 헷갈리기 쉬운 '예정가격(VAT 포함)'과 법적 기준인 '추정가격(VAT 제외)'을 상호 변환하여 정확한 판정 제공</li>
+        <li><b>실시간 맞춤 판정 엔진</b> — S2B(1억 이하), G2B, eaT, 온비드 판단 및 최적의 공고 기간 추천</li>
+        <li><b>입찰 공고기간 계산기</b> — 공고 시작일과 기준 일수를 입력하면 법정 마감일을 실시간 계산 (주말/공휴일 제외 옵션 제공)</li>
+        <li><b>수의계약 배제사유 자가진단</b> — 계약 체결 전 반드시 확인해야 할 법적 체크리스트 제공</li>
+      </ul>
+    </section>
+
+    <section id="s5">
+      <div class="step-badge">✅</div>
+      <h3>마무리</h3>
+      <div class="underline"></div>
+      <div class="callout tip"><b>STEP 3 정리</b> — Gem은 내가 프롬프트를 매번 짜지 않아도 일하도록 만든 <b>'나만의 전용 업무 독방'</b>입니다. 자주 쓰는 업무 포맷과 지침을 고정해 두고 비서처럼 부려보세요.</div>
+      <p>👉 다음 <b>STEP 4 · 노트북LM 기본</b>에서는 제미나이를 넘어, 수십 권의 방대한 규정집과 교육청 예산서를 한 번에 통째로 삼켜 분석하는 <b>'나만의 인공지능 도서관'</b> 구축법을 배웁니다.</p>
+      <div class="linkrow"><a class="btn" href="step4.html">STEP 4 · 노트북LM 기본으로 이어가기 →</a></div>
+    </section>
+
+    <footer>
+      <div class="gline"></div>
+      A.I라는 키 · 성장단계별 맞춤형연수(6급 승진자) · STEP 3 GEM 챗봇 만들기 &nbsp;|&nbsp; FlowDX 이애진
+    </footer>
+  </main>
+</div>
+<script>
+  document.querySelectorAll('.copybtn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var pre=btn.parentElement.querySelector('pre');
+      navigator.clipboard.writeText(pre.innerText).then(function(){
+        var o=btn.innerText;btn.innerText='✓ 복사됨';btn.classList.add('done');
+        setTimeout(function(){btn.innerText=o;btn.classList.remove('done');},1600);
+      });
+    });
+  });
+  document.querySelectorAll('nav.toc a').forEach(function(a){
+    a.addEventListener('click',function(e){var t=document.querySelector(a.getAttribute('href'));if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth'});}});
+  });
+</script>
+</body>
+</html>
