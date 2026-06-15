@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A.I라는 키 · STEP 4 노트북LM 기본</title>
+<style>
+  :root{
+    --gold:#bfa05f; --gold-soft:#d9c79b; --gold-bg:#f7f2e7;
+    --navy:#23303f; --navy2:#33475c; --ink:#2c333b; --gray:#6b7480;
+    --line:#e7e3da; --bg:#f6f6f4; --code:#26303c; --grid:#e9eef3;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;color:var(--ink);background:var(--bg);line-height:1.7;padding-top:58px;font-size:25px;
+    font-family:"Malgun Gothic","맑은 고딕",-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;}
+  a{color:var(--navy2)}
+  p,li{font-size:25px;}
+  .topbar{position:fixed;top:0;left:0;right:0;height:58px;z-index:200;display:flex;align-items:center;
+    justify-content:space-between;padding:0 22px;background:rgba(255,255,255,.93);
+    backdrop-filter:blur(8px);border-bottom:1px solid var(--line);box-shadow:0 1px 8px rgba(35,48,63,.05);}
+  .tb-brand{font-weight:800;color:var(--navy);text-decoration:none;font-size:17px;}
+  .tb-brand span{color:var(--gold);}
+  .tb-links{display:flex;gap:5px;flex-wrap:wrap;align-items:center;}
+  .tb-links a{font-size:13px;color:var(--ink);text-decoration:none;padding:7px 11px;border:1px solid var(--gold-soft);border-radius:7px;font-weight:600;}
+  .tb-links a:hover{background:var(--gold-bg);color:var(--navy);}
+  .tb-links a.active{color:#fff;background:var(--gold);}
+  .wrap{display:flex;max-width:1480px;margin:0 auto;}
+  nav.toc{position:sticky;top:58px;align-self:flex-start;width:284px;height:calc(100vh - 58px);
+    padding:30px 16px;border-right:1px solid var(--line);background:#fbfaf7;overflow-y:auto;flex:none;margin-right:38px;}
+  nav.toc .brand{font-size:28px;font-weight:800;color:var(--navy);}
+  nav.toc .brand span{color:var(--gold)}
+  nav.toc .sub{font-size:18px;color:var(--gray);margin-bottom:18px;}
+  nav.toc .divider{height:1px;background:var(--gold-soft);margin:0 0 16px;}
+  nav.toc h2{font-size:18px;color:var(--gray);letter-spacing:.06em;margin:0 0 10px;}
+  nav.toc a{display:block;padding:8px 12px;border-radius:7px;color:var(--ink);text-decoration:none;font-size:18px;margin-bottom:2px;}
+  nav.toc a:hover{background:var(--gold-bg);color:var(--navy);}
+  main{flex:1;min-width:0;padding:0 0 80px;}
+  header.hero{position:relative;padding:50px 22px 42px;background:
+    linear-gradient(0deg,rgba(255,255,255,.4),rgba(255,255,255,.4)),
+    repeating-linear-gradient(0deg,var(--grid) 0 1px,transparent 1px 38px),
+    repeating-linear-gradient(90deg,var(--grid) 0 1px,transparent 1px 38px),
+    linear-gradient(135deg,#fafbfc,#eef1f4);border-bottom:1px solid var(--line);}
+  header.hero .keyicon{font-size:32px;color:var(--gold);}
+  header.hero .tag{display:inline-block;border:1px solid var(--gold-soft);color:var(--navy2);
+    background:rgba(255,255,255,.6);padding:5px 14px;border-radius:999px;font-size:19px;margin-bottom:16px;}
+  header.hero h1{margin:0;font-size:38px;line-height:1.2;color:var(--navy);font-weight:800;}
+  .hr-gold{width:64px;height:2px;background:var(--gold);margin:16px 0;border:0;}
+  header.hero .meta{font-size:23px;color:var(--gray);}
+  header.hero .meta b{color:var(--navy2);font-weight:600}
+  section{padding:64px 22px;border-bottom:1px solid var(--line);border-top:3px solid var(--gold-soft);}
+  section:nth-of-type(even){background:#fbfaf7;} section:nth-of-type(odd){background:#fff;} #intro{background:#f4f1ea;}
+  .step-badge{display:inline-block;font-size:25px;font-weight:800;letter-spacing:.14em;color:#fff;
+    background:var(--gold);padding:6px 16px;border-radius:999px;margin-bottom:14px;box-shadow:0 2px 6px rgba(191,160,95,.3);}
+  section h3{font-size:41px;margin:0 0 6px;color:var(--navy);font-weight:800;line-height:1.25;}
+  .underline{width:46px;height:2px;background:var(--gold-soft);margin:0 0 16px;}
+  section h4{font-size:30px;margin:24px 0 8px;color:var(--navy);font-weight:700;}
+  .lead{font-size:28px;color:var(--gray)}
+  b.g{color:var(--gold)}
+  .callout{border-radius:10px;padding:16px 20px;margin:16px 0;font-size:24px;background:#fff;}
+  .tip{background:var(--gold-bg);border-left:4px solid var(--gold);}
+  .warn{background:#fbf3f1;border-left:4px solid #d99a86;}
+  .callout b{color:var(--navy)}
+  .linkrow{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0;}
+  .btn{display:inline-flex;align-items:center;gap:8px;background:var(--navy);color:#fff;text-decoration:none;
+    padding:12px 20px;border-radius:9px;font-size:24px;font-weight:600;box-shadow:0 3px 8px rgba(35,48,63,.18);}
+  .btn:hover{background:#16212e;} .btn.gold{background:var(--gold);} .btn.gold:hover{background:#ab8e4d;}
+  ul.steps{list-style:none;padding:0;margin:14px 0;counter-reset:s;}
+  ul.steps li{position:relative;padding:14px 14px 14px 52px;border:1px solid var(--line);border-radius:10px;margin-bottom:9px;background:#fff;font-size:24px;}
+  ul.steps li:before{counter-increment:s;content:counter(s);position:absolute;left:14px;top:16px;
+    width:28px;height:28px;border-radius:50%;background:var(--navy);color:#fff;font-size:15px;display:flex;align-items:center;justify-content:center;font-weight:700;}
+  .promptbox{position:relative;background:var(--code);color:#e8edf3;border-radius:11px;padding:22px 20px 20px;margin:14px 0;font-size:23px;}
+  .promptbox .label{font-size:19px;color:#9fb0c0;letter-spacing:.04em;margin-bottom:10px;font-weight:700;}
+  .promptbox pre{margin:0;white-space:pre-wrap;word-break:break-word;font-family:"Consolas","Malgun Gothic",monospace;line-height:1.7;font-size:22px;}
+  .copybtn{position:absolute;top:14px;right:14px;background:var(--gold);color:#fff;border:0;border-radius:7px;padding:7px 15px;font-size:19px;cursor:pointer;font-weight:700;}
+  .copybtn:hover{background:#ab8e4d;} .copybtn.done{background:#5a8a5a;}
+  /* vs cards */
+  .vs{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0;}
+  .vs .v{background:#fff;border:1px solid var(--gold-soft);border-radius:14px;overflow:hidden;box-shadow:0 8px 22px rgba(191,160,95,.16);}
+  .vs .vh{text-align:center;font-weight:800;color:#fff;font-size:23px;padding:15px;background:linear-gradient(135deg,#c6a766,#a8893f);}
+  .vs .vrow{padding:13px 18px;border-bottom:1px solid #f1ebda;font-size:21px;}
+  .vs .vrow:last-child{border-bottom:0;}
+  .vs .vrow b{color:var(--gold);display:block;font-size:17px;margin-bottom:2px;}
+  /* feature pills */
+  .feats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0;}
+  .feat{background:#fff;border:1px solid var(--gold-soft);border-left:5px solid var(--gold);border-radius:11px;padding:15px 18px;font-size:22px;}
+  details.toggle{border:1px solid var(--gold-soft);border-radius:12px;background:#fff;margin:18px 0;overflow:hidden;box-shadow:0 5px 14px rgba(191,160,95,.12);}
+  details.toggle summary{cursor:pointer;list-style:none;padding:16px 20px;font-size:24px;font-weight:800;color:var(--navy);background:var(--gold-bg);display:flex;align-items:center;gap:11px;}
+  details.toggle summary::-webkit-details-marker{display:none;}
+  details.toggle summary::before{content:"▶";color:var(--gold);font-size:16px;transition:transform .2s;}
+  details.toggle[open] summary::before{transform:rotate(90deg);}
+  details.toggle .tgbody{padding:8px 20px 18px;}
+  .feat b{color:var(--navy);}
+  .examples{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0;}
+  .ex{background:var(--gold-bg);border:1px solid var(--gold-soft);border-radius:999px;padding:8px 16px;font-size:20px;color:var(--navy);font-weight:600;}
+  .closing{text-align:center;border-top:3px solid var(--gold);
+    background:linear-gradient(135deg,#1c2836,#23303f 55%,#2c3e57);}
+  .closing h3{color:#fff;font-size:40px;line-height:1.25;}
+  .closing .underline{margin:12px auto 18px;width:80px;background:var(--gold);}
+  .closing p{color:#d5dde7;font-size:24px;}
+  .closing p b{color:#ecdcb2 !important;}
+  .closing .cq{margin-top:20px;font-size:27px;font-weight:800;color:var(--gold-soft);}
+  .closing .step-badge{background:var(--gold);}
+  @keyframes goldGlow{0%,100%{filter:drop-shadow(0 2px 12px rgba(191,160,95,.35));}50%{filter:drop-shadow(0 2px 26px rgba(224,195,122,.7));}}
+  @keyframes auraGlow{0%,100%{opacity:.5;}50%{opacity:.92;}}
+  .finale{position:relative;overflow:hidden;text-align:center;padding:88px 22px 84px;border-top:3px solid var(--gold);
+    background:radial-gradient(ellipse at 50% 42%, #ffffff 0%, #f6f1e6 78%);}
+  .finale .deco{position:absolute;pointer-events:none;z-index:0;}
+  .finale .b1{top:16%;left:20%;width:46px;height:46px;border-radius:13px;background:linear-gradient(135deg,#fff,#efe9da);border:1px solid #e9dec1;box-shadow:0 8px 16px rgba(120,100,50,.10);}
+  .finale .b2{top:11%;left:26%;width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#e7cf95,#bfa05f);box-shadow:0 8px 16px rgba(191,160,95,.30);}
+  .finale .b3{bottom:18%;right:22%;width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#fff,#efe9da);border:1px solid #e9dec1;box-shadow:0 8px 16px rgba(120,100,50,.10);}
+  .finale .d1{top:9%;right:14%;width:54px;height:96px;border:2px solid var(--gold-soft);border-radius:3px;background:linear-gradient(180deg,rgba(255,255,255,.6),rgba(247,242,231,.6));transform:perspective(300px) rotateY(-22deg);}
+  .finale .d2{bottom:10%;left:13%;width:54px;height:96px;border:2px solid var(--gold-soft);border-radius:3px;background:linear-gradient(180deg,rgba(255,255,255,.6),rgba(247,242,231,.6));transform:perspective(300px) rotateY(22deg);}
+  .finale .fmsg{position:relative;z-index:1;font-size:42px;font-weight:800;line-height:1.45;letter-spacing:-.01em;margin:0;
+    background:linear-gradient(180deg,#e7cf95 0%,#c9a865 45%,#a07f3d 100%);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
+    filter:drop-shadow(0 1px 8px rgba(191,160,95,.4));animation:goldGlow 3.6s ease-in-out infinite;}
+  .finale .fsign{position:relative;z-index:1;margin:26px 0 0;font-size:27px;font-weight:700;color:var(--navy);letter-spacing:.04em;}
+  footer{padding:28px 22px;color:var(--gray);font-size:20px;}
+  footer .gline{height:1px;background:var(--gold-soft);margin-bottom:14px;}
+  @media(max-width:860px){ nav.toc{display:none} .vs,.feats{grid-template-columns:1fr;} }
+  @media(max-width:720px){ .topbar{height:auto;flex-direction:column;align-items:flex-start;gap:6px;padding:8px 16px;} body{padding-top:104px;} }
+  /* === 통일 프리미엄 히어로 (네이비+골드 글로우) === */
+  header.hero{position:relative;overflow:hidden;padding:54px 22px 48px;border-bottom:3px solid var(--gold);background:
+      repeating-linear-gradient(0deg,rgba(255,255,255,.03) 0 1px,transparent 1px 42px),
+      repeating-linear-gradient(90deg,rgba(255,255,255,.03) 0 1px,transparent 1px 42px),
+      radial-gradient(ellipse at 28% 22%, #2d3f58 0%, #1c2836 55%, #131b25 100%);}
+  header.hero::before{content:"";position:absolute;top:-34%;left:4%;width:520px;max-width:72%;height:360px;border-radius:50%;
+    background:radial-gradient(ellipse,rgba(191,160,95,.26),rgba(191,160,95,.07) 45%,transparent 72%);filter:blur(10px);pointer-events:none;animation:auraGlow 4.5s ease-in-out infinite;}
+  header.hero > *{position:relative;z-index:1;}
+  header.hero .keyicon{font-size:36px;color:#e7cf95;filter:drop-shadow(0 0 14px rgba(214,184,110,.6));animation:goldGlow 3.6s ease-in-out infinite;}
+  header.hero .tag{display:inline-block;border:1px solid rgba(217,199,155,.45);color:#ecdcb2;background:rgba(255,255,255,.06);padding:6px 15px;border-radius:999px;font-size:19px;margin-bottom:16px;}
+  header.hero h1{margin:0;font-size:40px;line-height:1.22;font-weight:800;letter-spacing:-.01em;
+    background:linear-gradient(180deg,#fbeec2,#ecd396 40%,#c8a865 70%,#a07f3d);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
+    filter:drop-shadow(0 2px 14px rgba(191,160,95,.5));}
+  header.hero h1 span{color:#b4c0cd !important;-webkit-text-fill-color:#b4c0cd !important;font-size:20px !important;}
+  header.hero .hr-gold{width:74px;height:2px;margin:18px 0;border:0;background:linear-gradient(90deg,var(--gold),transparent);box-shadow:0 0 12px rgba(191,160,95,.7);}
+  header.hero .meta{font-size:23px;color:#cdd6e2;}
+  header.hero .meta b{color:#ecdcb2 !important;}
+  @keyframes goldGlow{0%,100%{filter:drop-shadow(0 2px 12px rgba(191,160,95,.35));}50%{filter:drop-shadow(0 2px 24px rgba(224,195,122,.65));}}
+  @keyframes auraGlow{0%,100%{opacity:.5;}50%{opacity:.9;}}
+  /* === 골드 아웃라인 사이드바 (밝고 깔끔) === */
+  nav.toc{background:#fbfaf8;border-right:1px solid var(--line);}
+  nav.toc .brand{color:var(--navy);}
+  nav.toc .brand span{color:var(--gold);}
+  nav.toc .sub{color:var(--gray);}
+  nav.toc .divider{background:var(--gold-soft);}
+  nav.toc h2{color:var(--gold);font-weight:800;}
+  nav.toc a{border:1px solid var(--line);background:#fff;border-radius:9px;margin-bottom:6px;color:var(--navy2);transition:border-color .12s,background .12s;}
+  nav.toc a:hover{border-color:var(--gold);background:var(--gold-bg);color:var(--navy);}
+  nav.toc a.sub2{border:0;background:transparent;margin:0 0 3px;font-size:18px;color:var(--gray);padding:5px 12px 5px 28px;}
+  nav.toc a.sub2:hover{background:transparent;border:0;color:var(--navy);}
+  @media(min-width:861px){ header.hero{padding-left:50px;} main section{padding-left:50px;} }
+  /* NotebookLM 실습 카드 */
+  .lmintro{background:var(--gold-bg);border:1px solid var(--gold-soft);border-left:5px solid var(--gold);border-radius:12px;padding:18px 22px;margin:16px 0;font-size:23px;line-height:1.6;}
+  .lmcard{background:#fff;border:1px solid var(--gold-soft);border-radius:13px;padding:20px 22px;margin:16px 0;box-shadow:0 6px 16px rgba(191,160,95,.13);}
+  .lmcard .lmhead{display:flex;align-items:center;gap:11px;font-size:24px;font-weight:800;color:var(--navy);}
+  .lmcard .lmno{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:var(--gold);color:#fff;font-size:19px;flex:none;box-shadow:0 2px 6px rgba(191,160,95,.35);}
+  .lmcard .lmpurpose{font-size:21px;color:var(--gray);margin:4px 0 4px 47px;}
+  .lmcard .lmfn{margin-top:10px;font-size:20px;color:#8a6d2e;background:var(--gold-bg);border-radius:9px;padding:9px 14px;}
+  .lmcard .lmfn b{color:var(--navy);}
+  /* 컴팩트 가이드 표 */
+  .gtblwrap{overflow-x:auto;margin:14px 0;}
+  .gtbl{width:100%;border-collapse:collapse;background:#fff;border-radius:11px;overflow:hidden;box-shadow:0 5px 14px rgba(191,160,95,.12);}
+  .gtbl th{background:linear-gradient(135deg,#c6a766,#a8893f);color:#fff;text-align:left;padding:9px 12px;font-size:16px;white-space:nowrap;}
+  .gtbl td{padding:9px 12px;border-bottom:1px solid #f1ebda;vertical-align:top;font-size:15px;line-height:1.5;}
+  .gtbl tr:last-child td{border-bottom:0;}
+  .gtbl .no{font-weight:800;color:var(--gold);text-align:center;font-size:17px;}
+  .gtbl .cat{font-weight:700;color:var(--navy);white-space:nowrap;}
+  .gtbl .pp{white-space:pre-wrap;word-break:break-word;font-size:14.5px;color:#2c333b;background:#faf7f0;border:1px solid #ece4d2;border-radius:7px;padding:9px 11px;margin:0;font-family:inherit;line-height:1.55;}
+  .gtbl .copybtn{position:static;display:inline-block;margin-top:6px;background:var(--gold);color:#fff;border:0;border-radius:6px;padding:5px 13px;font-size:14px;cursor:pointer;font-weight:700;}
+  .gtbl .copybtn:hover{background:#ab8e4d;} .gtbl .copybtn.done{background:#5a8a5a;}
+  .gtbl .fn{font-size:14.5px;color:#8a6d2e;}
+  /* 분류별 프롬프트 카드 그리드 */
+  .gnote{font-size:18px;font-weight:800;color:var(--navy);margin:14px 0 8px;}
+  .pggrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:8px 0;align-items:start;}
+  .pgcard{background:#fff;border:1px solid var(--gold-soft);border-radius:12px;overflow:hidden;box-shadow:0 5px 14px rgba(191,160,95,.12);}
+  .pgcard .pgh{background:linear-gradient(135deg,#c6a766,#a8893f);color:#fff;font-weight:800;font-size:17px;padding:11px 14px;}
+  .pgitem{padding:12px 14px;border-bottom:1px solid #f1ebda;}
+  .pgitem:last-child{border-bottom:0;}
+  .pgq{display:block;white-space:pre-wrap;word-break:break-word;font-family:inherit;font-size:15px;color:#2c333b;line-height:1.55;margin:0 0 8px;}
+  .pgitem .copybtn{position:static;display:inline-block;background:var(--gold-bg);color:#8a6d2e;border:1px solid var(--gold-soft);border-radius:6px;padding:4px 13px;font-size:14px;cursor:pointer;font-weight:700;}
+  .pgitem .copybtn:hover{background:#efe4c9;} .pgitem .copybtn.done{background:#5a8a5a;color:#fff;border-color:#5a8a5a;}
+  @media(max-width:860px){.pggrid{grid-template-columns:1fr;}}
+  .secgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0;}
+  .seccard{background:#fff;border:1px solid var(--gold-soft);border-top:4px solid var(--gold);border-radius:12px;padding:16px 18px;box-shadow:0 5px 14px rgba(191,160,95,.12);}
+  .seccard h5{margin:0 0 8px;font-size:21px;color:var(--navy);}
+  .seccard .srow{display:flex;justify-content:space-between;gap:10px;font-size:19px;padding:7px 0;border-bottom:1px dashed #ece4d2;}
+  .seccard .srow:last-child{border-bottom:0;}
+  .seccard .srow .k{color:var(--gray);}
+  .seccard .srow .v{color:#8a6d2e;font-weight:700;white-space:nowrap;}
+  .designtag{display:inline-block;background:var(--gold-bg);border:1px solid var(--gold-soft);color:#8a6d2e;font-weight:700;font-size:20px;border-radius:999px;padding:8px 18px;margin:5px 7px 5px 0;}
+  .ktable{width:100%;border-collapse:collapse;margin:14px 0;background:#fff;border-radius:11px;overflow:hidden;box-shadow:0 5px 14px rgba(191,160,95,.12);}
+  .ktable th{background:linear-gradient(135deg,#c6a766,#a8893f);color:#fff;text-align:left;padding:13px 16px;font-size:21px;}
+  .ktable td{padding:13px 16px;border-bottom:1px solid #f1ebda;vertical-align:top;font-size:21px;}
+  .ktable tr:last-child td{border-bottom:0;}
+  .kbd{display:inline-block;background:#23303f;color:#fff;border-radius:7px;padding:4px 12px;font-weight:700;font-size:19px;white-space:nowrap;font-family:"Consolas",monospace;}
+  @media(max-width:760px){.secgrid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a class="tb-brand" href="index.html">A.<span>I</span>라는 키</a>
+  <nav class="tb-links">
+    <a href="index.html">🏠 홈</a>
+    <a href="step1.html">STEP 1 · 환경세팅</a>
+    <a href="step2.html">STEP 2 · 할루시네이션·RAG</a>
+    <a href="step3.html">STEP 3 · GEM 챗봇</a>
+    <a class="active" href="step4.html">STEP 4 · 노트북LM 기본</a>
+    <a href="step5.html">STEP 5 · 노트북LM 실습</a>
+    <a href="step6.html">STEP 6 · 프롬프트</a>
+    <a href="gift.html">🎁 선물</a>
+  </nav>
+</div>
+
+<div class="wrap">
+  <nav class="toc">
+    <div class="divider"></div>
+    <h2>STEP 4 · 노트북LM 기본</h2>
+    <a href="#intro">들어가기</a>
+    <a href="#s5">1. 전용 도서관 NotebookLM</a>
+    <a href="#slm" style="background:var(--gold);color:#fff;font-weight:800">2. 노트북LM 예시 ① 작년기안문 마스터</a>
+    <a href="#slm2" style="background:var(--gold);color:#fff;font-weight:800">3. 노트북LM 예시 ② 스마트행정아카이브</a>
+  </nav>
+
+  <main>
+    <header class="hero">
+      <div class="keyicon">🤖</div>
+      <h1>STEP 4 · 노트북LM 기본 <span style="font-size:19px;color:var(--gray);font-weight:600;">— 전용 도서관으로 내 문서 다루기</span></h1>
+      <hr class="hr-gold">
+      <p class="meta">오직 내 자료로만 답하는 <b>NotebookLM</b>으로 '내 문서 기반 나만의 AI 비서'를 만듭니다.</p>
+    </header>
+
+    <section id="intro">
+      <div class="step-badge" style="margin-top:150px">START</div>
+      <h3>이번 STEP에서 배우는 것</h3>
+      <div class="underline"></div>
+      <p class="lead">오직 내가 올린 자료로만 답하는 <b>NotebookLM</b>의 원리를 이해하고, 내 업무 문서를 올려 <b>'내 문서 기반 나만의 AI 비서'</b>를 만드는 흐름을 익힙니다.</p>
+      <div class="callout tip">💡 공통 업무는 <b>지원이(G-ONE)</b>에게, 보안·내 업무 문서는 <b>내 챗봇(NotebookLM)</b>에게 맡깁니다.</div>
+    </section>
+
+    <section id="s5">
+      <div class="step-badge">1</div>
+      <h3>궁극의 무기 — 당신만의 '전용 도서관' <span style="color:var(--gold)">NotebookLM</span></h3>
+      <div class="underline"></div>
+      <p><b>NotebookLM</b>은 오직 <b>내가 업로드한 자료로만</b> 답변을 생성하는 <b>출처 기반(Source-Grounding) AI</b>입니다.</p>
+      <div class="feats">
+        <div class="feat"><b>강력한 보안과 정확성</b> — 내 문서에 없는 내용은 임의로 지어내지 않기 때문에 할루시네이션(환각) 현상이 거의 없습니다. 무엇보다 사용자가 업로드한 자료를 AI 모델 학습에 <b>절대 활용하지 않으므로</b> 보안 면에서 매우 안전합니다.</div>
+        <div class="feat"><b>압도적인 대용량 및 포맷 지원</b> — 노트북 한 개당 최대 <b>50개의 소스</b>를 올릴 수 있으며, 소스당 최대 <b>50만 단어</b>까지 수용합니다. PDF, 구글 문서, 슬라이드, 웹사이트 URL, 유튜브 링크, 복사한 텍스트 등 다양한 포맷을 모두 지원하며 현재 <b>무료</b>로 이용할 수 있습니다.</div>
+      </div>
+      <div class="linkrow"><a class="btn gold" href="https://notebooklm.google.com" target="_blank" rel="noopener">📓 NotebookLM 열기</a></div>
+      <details class="toggle">
+        <summary>[구축하는 핵심 순서] — 클릭하면 자세한 내용을 볼 수 있어요.</summary>
+        <div class="tgbody">
+          <ul class="steps">
+            <li style="font-size:17px">NotebookLM에 접속하여 <b>[새 노트북]</b>을 생성합니다.</li>
+            <li style="font-size:17px">내 업무 자료(운영 지침, 행정 규정, 작년 기안문 등)를 <b>소스로 업로드</b>합니다.</li>
+            <li style="font-size:17px">질문을 입력하면 AI가 <b>업로드한 자료에만 근거</b>하여 답하고, 구체적인 출처 위치를 <b>인용 부호</b>로 표시해 줍니다.</li>
+            <li style="font-size:17px">필요에 따라 문서 내용을 <b>마인드맵, 오디오 개요(팟캐스트 형태), FAQ</b> 등으로 자동 정리하여 활용합니다.</li>
+          </ul>
+        </div>
+      </details>
+    </section>
+
+    <section id="slm">
+      <div class="step-badge">2</div>
+      <h3>노트북LM 예시 ① — <span style="color:var(--gold)">작년 기안문 마스터 AI</span></h3>
+      <div class="underline"></div>
+      <div class="lmintro">📌 본 NotebookLM은 행정 규정과 전임자의 가상 기안 사례 <b>10종</b>을 학습한 <b>'가상의 기안문 비서'</b>입니다. 규정 확인부터 기안문 초안 작성까지, 전임자의 노하우를 AI로 경험하도록 설계해 보세요.</div>
+      <p style="margin:75px 0">작년 결재 문서와 운영 지침만 넣어두면, <b>"작년 기안문 참고해서 올해 ○○ 계획서 써줘"</b> 한마디에 예산 과목·법령 근거까지 반영한 초안을 몇 초 만에 만들어 줍니다.</p>
+      <div style="background:#fdf3f2;border:2px solid #f1c8c2;border-radius:14px;padding:18px 22px;margin:14px 0">
+        <ul style="margin:0;padding-left:22px;color:#c0392b;font-size:18px;line-height:1.6">
+          <li style="margin-bottom:8px"><b>지긋지긋한 '전임자 파일 찾기'의 종말</b> — 인사 이동 철이나 새 사업 때 "작년엔 이거 어떻게 기안했지?"라며 옛날 파일(K-에듀파인·USB·공유폴더)을 뒤지던 시간을 아껴줍니다.</li>
+          <li style="margin-bottom:8px"><b>신규·주무관 기안문 교정 스트레스 해소</b> — 주무관이 가져온 기안문을 붙잡고 빨간 펜 선생님 하던 스트레스를 줄여줍니다. AI가 초안을 행정실 스타일(법령 근거·규정 서식)에 맞게 1차로 싹 잡아주기 때문입니다.</li>
+          <li><b>감사(Audit) 대비 및 규정 준수</b> — "이 수당 계산 맞나? 조례 바뀌었나?" 불안해할 필요 없이, 검증된 우리 부서 자료 안에서만 답을 찾아 행정의 정확성이 올라갑니다.</li>
+        </ul>
+      </div>
+      <div class="linkrow" style="margin-top:50px"><a class="btn gold" href="https://notebooklm.google.com/notebook/4937ceff-a1bd-49ae-812d-a89aa54637ae" target="_blank" rel="noopener">📓 예시 노트북 열어보기 — 작년 기안문 마스터 AI</a></div>
+      <img src="./images/notebooklm-guide.png" alt="NotebookLM 학교 행정실 공문서 작성 가이드 화면" style="display:block;width:100%;max-width:940px;margin:26px auto;border:3px solid var(--gold);border-radius:14px;box-shadow:0 12px 28px rgba(191,160,95,.24);">
+      <h4 style="margin-top:100px">📋 학교 행정실 맞춤형 공문서 작성 프롬프트 가이드</h4>
+      <p style="font-size:22px;color:var(--gray)">기안문 10종을 업로드한 NotebookLM에, 아래 프롬프트를 복사해 붙여넣어 실습하세요.</p>
+
+      <div class="gtblwrap">
+      <table class="gtbl">
+        <tr><th>연번</th><th>업무 분류</th><th>세부 목적</th><th style="min-width:340px">바로 쓰기용 프롬프트 (복사해서 사용)</th><th>핵심 기능</th></tr>
+        <tr>
+          <td class="no">1</td><td class="cat">사후조치</td><td>시설물 파손 및 변상 요청</td>
+          <td><pre class="pp">업로드된 6번 기안문의 '허가 조건'을 참고해 줘. '지역 배드민턴 동호회'가 지난 토요일 체육관 대관 중 '출입문 유리창 및 네트 지주대'를 파손했어. 학교의 시설 개방 조례를 근거로, 원상복구를 요구하는 내부 결재용 기안문과 외부 단체 발송용 공문(시행문) 초안을 분리해서 작성해 줘. 5월 25일까지의 조치 기한과 미이행 시 허가 취소 불이익을 포함해 줘.</pre><button class="copybtn">📋 복사</button></td>
+          <td class="fn">내/외부 문서 분리 작성 및 목적별 톤 조정</td>
+        </tr>
+        <tr>
+          <td class="no">2</td><td class="cat">관재</td><td>불용 처리 및 신규 구매 동시 진행</td>
+          <td><pre class="pp">올해 학교에서 '노후 교육용 태블릿 PC 30대'를 불용 처리하고, '최신형 노트북 30대'를 새로 사려고 해. 업로드된 10번 기안문을 참고해서 태블릿 PC 폐기 계획안을 쓰고, 5번 기안문을 참고해서 대당 80만 원인 신규 노트북 구매 계획 기안문을 각각 분리해서 써줘.</pre><button class="copybtn">📋 복사</button></td>
+          <td class="fn">자산의 생애주기 관리 (폐기 + 구매 연계)</td>
+        </tr>
+        <tr>
+          <td class="no">3</td><td class="cat">예산 / 행정</td><td>기존 계획 답습 및 내용 조정</td>
+          <td><pre class="pp">업로드된 3번 기안문(학교운영위원회 개최 공고)을 참고해 줘. 이번 제251회 임시회에서는 '2026학년도 제2차 추가경정 예산(안)'을 심의하려고 해. 지난 1차보다 예산이 10% 증액되었고, '교육환경 개선비' 비중을 대폭 높인 내용을 주요 안건으로 포함해서 임시회 개최 공고 기안문 초안을 새로 써줘.</pre><button class="copybtn">📋 복사</button></td>
+          <td class="fn">기존 문서 형식 유지 및 신규 수치 / 내용 반영</td>
+        </tr>
+        <tr>
+          <td class="no">4</td><td class="cat">구매</td><td>반복되는 물품 구매</td>
+          <td><pre class="pp">업로드된 5번 기안문(학교 물품 구매 보고)을 참고해 줘. 작년 문서 형식을 활용해서 올해는 4학년 교실 노트북 대신 '과학실 학생용 태블릿 PC 20대'를 사려고 해. 대당 예산은 50만 원이고, 예산 과목은 '학교회계-정보화교육-자산취득비'야. 기존 문서와 동일한 법령을 근거로 기안문 초안을 써줘.</pre><button class="copybtn">📋 복사</button></td>
+          <td class="fn">품목 변경 및 자산등록 절차 계승</td>
+        </tr>
+        <tr>
+          <td class="no">5</td><td class="cat">행정 / 안전</td><td>점검 결과를 기안문으로 변환</td>
+          <td><pre class="pp">업로드된 8번 기안문(학교 환경위생 측정 결과) 형식을 참고해서, 어제 실시한 '2026학년도 하반기 정기 공기질 측정 결과 보고' 기안문을 써줘. 이번에는 모든 교실이 '적합' 판정을 받았지만, '과학실의 이산화탄소 수치가 다소 높아 환기 지도가 필요하다'는 점검 결과를 유지 관리 부분에 반영해서 초안을 잡아줘.</pre><button class="copybtn">📋 복사</button></td>
+          <td class="fn">비정형 데이터(점검 / 회의 결과)의 공문화</td>
+        </tr>
+        <tr>
+          <td class="no">6</td><td class="cat">복무 / 수당</td><td>규정 준수 여부 사전 검토</td>
+          <td><pre class="pp">업로드된 2번 기안문(교육공무직원 연장근무 명령)을 참고해 줘. 이번 학부모 총회 준비로 교무실무사 2명에게 주말(토요일) 5시간 연장근무를 명령하려고 해. 근로기준법상 주 52시간 제한이나 휴일 연장근무 가산율(1.5배) 적용 기준에 맞게 수당 산출 내역을 포함해서 기안문 초안을 써줘.</pre><button class="copybtn">📋 복사</button></td>
+          <td class="fn">규정 체크: 근로기준법에 따른 수당 자동 계산</td>
+        </tr>
+      </table>
+      </div>
+    </section>
+
+    <section id="slm2">
+      <div class="step-badge">3</div>
+      <h3>노트북LM 예시 ② — <span style="color:var(--gold)">스마트 행정 아카이브</span></h3>
+      <div class="underline"></div>
+      <p style="color:var(--gold);font-weight:800;font-size:26px;margin:6px 0 4px">복잡한 규정을 1초 만에 찾아주는 '두뇌(법률 자문관)'</p>
+      <p style="margin:75px 0">'기안문 마스터'가 글을 대신 써주는 <b>'손발'</b>이라면, '스마트 행정 아카이브'는 흩어진 규정·매뉴얼·지침을 <b>1초 만에 찾아내 근거까지 짚어주는 '두뇌'</b>입니다.</p>
+      <div style="background:#fdf3f2;border:2px solid #f1c8c2;border-radius:14px;padding:18px 22px;margin:14px 0">
+        <ul style="margin:0;padding-left:22px;color:#c0392b;font-size:18px;line-height:1.6">
+          <li style="margin-bottom:8px"><b>"지침서가 법전보다 두꺼운데, 언제 다 찾나"</b> — 수백 페이지 지침서를 책상에 쌓아두고 Ctrl+F로 헤매던 탐색 시간을 없애줍니다.</li>
+          <li style="margin-bottom:8px"><b>"이거 징계 감액 비율이 어떻게 되더라?"</b> — 복잡한 규정(복직자 정근수당·징계 감액 등)을 물어와도, AI가 규정집 근거와 출처(페이지)까지 짚어줘 감사 우려를 덜어줍니다.</li>
+          <li><b>업무 인수인계·신규 자립 지원</b> — "지침서 보고 알아서 해" 대신 아카이브 링크 하나면 신규 주무관도 스스로 고난도 급여·복무 작업을 처리해, 관리자의 교육 부담이 크게 줄어듭니다.</li>
+        </ul>
+      </div>
+      <div class="linkrow" style="margin-top:50px"><a class="btn gold" href="https://notebooklm.google.com/notebook/1a9c3f2b-955d-4edb-8f17-84f79651102c" target="_blank" rel="noopener">📓 예시 노트북 열어보기 — 스마트 행정 아카이브</a></div>
+      <img src="./images/smart-archive.png" alt="율곡 스마트 행정 아카이브(인사·복무·급여) 노트북LM 화면" style="display:block;width:100%;max-width:1000px;margin:18px auto;border:3px solid var(--gold);border-radius:14px;box-shadow:0 12px 28px rgba(191,160,95,.24);">
+      <p style="font-size:23px">인사·예산·일반행정(인사·복무·급여) 자료를 올린 노트북입니다. 아래 세 가지 가이드를 단계별로 활용해 보세요.</p>
+      <div style="height:1px;margin-bottom:100px"></div>
+      <div class="lmcard">
+        <div class="lmhead"><span class="lmno">1</span> 교육행정 활용 '기초 프롬프트' 가이드</div>
+        <div class="lmpurpose">인사·예산·일반행정 업무에 바로 쓰는 기본 질문·요약·확인 프롬프트</div>
+        <div class="gnote">[경기도교육청 소속 교육행정직 공무원 추천 프롬프트] — 그대로 복사해서 질문해 보세요.</div>
+        <div class="pggrid">
+          <div class="pgcard">
+            <div class="pgh">💰 공무원·교원 급여/수당 실무</div>
+            <div class="pgitem"><pre class="pgq">휴직 후 복직한 공무원이나 신규 발령자의 정근수당 지급을 위한 '실제 근무기간(월)' 계산 방법과 산출 방식을 알려줘.</pre><button class="copybtn">📋 복사</button></div>
+            <div class="pgitem"><pre class="pgq">징계를 받은 공무원의 각종 수당(정근수당 가산금, 가족수당 등) 감액 지급 기준은 어떻게 돼?</pre><button class="copybtn">📋 복사</button></div>
+            <div class="pgitem"><pre class="pgq">경기도교육청 소속 기간제교원의 정근수당 지급 방식 변경 사항이랑 수당 지급 기준을 설명해줘.</pre><button class="copybtn">📋 복사</button></div>
+          </div>
+          <div class="pgcard">
+            <div class="pgh">📋 기간제교원 호봉 획정</div>
+            <div class="pgitem"><pre class="pgq">기간제교원 호봉을 획정할 때, 학위 취득 기간과 근무(또는 군 복무) 경력이 중복되면 어떻게 인정하고 계산해?</pre><button class="copybtn">📋 복사</button></div>
+            <div class="pgitem"><pre class="pgq">시간강사 경력이 여러 학교에서 중복되거나 대학 조교 경력이 있으면, 경력 환산율과 계산법을 구체적인 사례로 설명해줘.</pre><button class="copybtn">📋 복사</button></div>
+          </div>
+          <div class="pgcard">
+            <div class="pgh">👥 교육공무직원·특수운영직군 관리</div>
+            <div class="pgitem"><pre class="pgq">2025년 기준 교육공무직원과 특수운영직군(시설미화원, 시설당직원 등)의 기본급, 정기상여금 등 임금 지급 기준과 주요 변경 사항은 뭐야?</pre><button class="copybtn">📋 복사</button></div>
+            <div class="pgitem"><pre class="pgq">취업규칙에 따른 교육공무직원의 징계 종류와 감경 기준에 대해 요약해줘.</pre><button class="copybtn">📋 복사</button></div>
+            <div class="pgitem"><pre class="pgq">교육공무직원(결원대체 인력)을 신규 채용할 때 결격사유 조회나 필요 서류 확인 등 처리 절차를 알려줘.</pre><button class="copybtn">📋 복사</button></div>
+          </div>
+          <div class="pgcard">
+            <div class="pgh">🎁 맞춤형 복지제도·NEIS 시스템</div>
+            <div class="pgitem"><pre class="pgq">맞춤형 복지제도의 주요 변경 사항이나 복지점수 월할 계산 기준은 어떻게 돼?</pre><button class="copybtn">📋 복사</button></div>
+            <div class="pgitem"><pre class="pgq">타 시·도에서 전입 오거나 신규 발령받은 공무원의 맞춤형 복지 단체보험 가입 및 복지포인트 배정을 위한 나이스(NEIS) 처리 순서를 알려줘.</pre><button class="copybtn">📋 복사</button></div>
+            <div class="pgitem"><pre class="pgq">나이스(NEIS) 일반행정 시스템을 이용한 급여 작업 시, 기초자료 생성부터 급여대장 출력 및 마감까지 초보자가 꼭 확인해야 할 월별 작업 순서를 요약해줘.</pre><button class="copybtn">📋 복사</button></div>
+          </div>
+        </div>
+      </div>
+      <div class="lmcard" style="margin-top:100px">
+        <div class="lmhead"><span class="lmno">2</span> 교육행정 맞춤형 '기획서' 프롬프트 가이드</div>
+        <div class="lmpurpose">사업 기획서·계획서를 구조적으로 작성하는 프롬프트</div>
+        <div class="gtblwrap">
+        <table class="gtbl">
+          <tr><th colspan="3" style="font-size:18px">📋 [근무지별 기획서 프롬프트 모음]</th></tr>
+          <tr><th style="width:14%">근무지<br>(부서)</th><th style="width:16%">기획서/계획서 종류</th><th>프롬프트 내용 (복사해서 사용해 봐!)</th></tr>
+          <tr><td class="cat">🏫 학교<br>행정실</td><td>교육공무직원 채용 계획서</td><td><pre class="pp">아래 정보를 바탕으로 교육공무직원 채용 계획서를 작성해줘.
+소스 파일의 채용 절차와 구비서류 규정을 근거로 활용해줘.
+- 학교명: ○○초등학교
+- 채용 직종: 조리실무사 1명
+- 채용 사유: 육아휴직 대체
+- 채용 기간: 2025년 3월 ~ 8월
+- 예산: 월 ○○만 원
+구성: 채용 배경 / 채용 절차 및 일정 / 구비서류 목록 / 유의사항</pre><button class="copybtn">📋 복사</button></td></tr>
+          <tr><td class="cat">🏫 학교<br>행정실</td><td>학교 급여업무 연간 운영 계획</td><td><pre class="pp">아래 정보를 바탕으로 학교 급여업무 연간 운영 계획서를 작성해줘.
+소스 파일의 월별 수당 지급 일정과 NEIS 작업 절차를 근거로 써줘.
+- 학교명: ○○중학교
+- 담당자: 행정주무관 ○명
+- 주요 대상: 교원, 교육공무직원, 기간제교사
+구성: 월별 주요 업무 / 주의사항 / 담당자 역할 분장</pre><button class="copybtn">📋 복사</button></td></tr>
+          <tr><td class="cat">📘 학교<br>행정지원과<br>(지원청)</td><td>신규 행정실 담당자 역량강화 연수 기획서</td><td><pre class="pp">아래 정보를 바탕으로 연수 기획서를 작성해줘.
+소스 파일의 NEIS 급여작업 절차, 복무관리 기준, 채용 규정을 교육 근거로 활용해줘.
+- 주관: ○○교육지원청 학교행정지원과
+- 연수 대상: 신규 발령 행정실 직원 ○명
+- 일정: 2025년 3월 (1박 2일)
+- 장소: ○○연수원
+- 예산: ○○만 원
+구성: 연수 필요성 / 일정 및 커리큘럼 / 예산 / 기대효과</pre><button class="copybtn">📋 복사</button></td></tr>
+          <tr><td class="cat">📘 학교<br>행정지원과<br>(지원청)</td><td>교육공무직원 인력풀 운영 개선 계획서</td><td><pre class="pp">아래 정보를 바탕으로 인력풀 운영 개선 계획서를 작성해줘.
+소스 파일의 대체인력 채용 절차와 승인 기준을 근거로 활용해줘.
+- 주관: ○○교육지원청
+- 관내 학교 수: ○○개교
+- 현재 인력풀 등재 인원: ○명
+- 개선 목표: 대체인력 충원율 ○% 향상
+구성: 현황 및 문제점 / 개선 방안 / 추진 일정 / 기대효과</pre><button class="copybtn">📋 복사</button></td></tr>
+          <tr><td class="cat">📋 기획<br>경영과</td><td>사회복무요원 배치·운영 계획서</td><td><pre class="pp">아래 정보를 바탕으로 사회복무요원 운영 계획서를 작성해줘.
+소스 파일의 복무관리 규정과 복무기록 서식을 근거로 활용해줘.
+- 기관명: ○○교육지원청
+- 배치 인원: ○명
+- 배치 부서: ○○과 외 ○개 부서
+- 복무 기간: 2025년 ○월 ~ ○월
+구성: 배치 현황 / 업무 분장 / 복무관리 방법 / 유의사항</pre><button class="copybtn">📋 복사</button></td></tr>
+          <tr><td class="cat">💰 재무<br>관리과</td><td>맞춤형복지 연간 운영 계획서</td><td><pre class="pp">아래 정보를 바탕으로 맞춤형복지 운영 계획서를 작성해줘.
+소스 파일의 공무원·교육공무직원·기간제교원 복지항목과 복지점수 기준을 근거로 활용해줘.
+- 주관: ○○교육지원청 재무관리과
+- 지원 대상: 공무원 ○명, 교육공무직원 ○명, 기간제교원 ○명
+- 총 예산: ○○백만 원
+- 신청 기간: 2025년 ○월 ~ ○월
+구성: 대상별 지원 기준 / 신청 절차 / 운영 일정 / 유의사항</pre><button class="copybtn">📋 복사</button></td></tr>
+          <tr><td class="cat">🏫 초·중등<br>교육지원과</td><td>기간제교원 채용·운영 가이드 기획서</td><td><pre class="pp">아래 정보를 바탕으로 기간제교원 운영 가이드를 작성해줘.
+소스 파일의 계약제교원 운영지침(연가일수, 복무기준)을 근거로 활용해줘.
+- 주관: ○○교육지원청 중등교육지원과
+- 관내 기간제교원 수: 약 ○명
+- 배포 대상: 관내 학교 행정실 담당자
+구성: 채용 절차 / 복무 기준 / 연가 일수 / 자주 묻는 Q&A</pre><button class="copybtn">📋 복사</button></td></tr>
+        </table>
+        </div>
+      </div>
+      <div class="lmcard" style="margin-top:100px">
+        <div class="lmhead"><span class="lmno">3</span> 교육행정 '슬라이드 및 인포그래픽' 프롬프트 가이드</div>
+        <div class="lmpurpose">보고용 슬라이드·인포그래픽·동영상을 자동으로 만드는 프롬프트</div>
+        <div class="callout warn">⚠️ <b>데모 전용 — 직접 실습하지 마세요!</b><br>아래 세 가지는 <b>채팅창에서도 가능</b>하지만, 오늘 연수에서는 <b>시연만 보고</b> 따라 하지 않습니다.
+        <ul style="margin:10px 0 0;padding-left:24px;">
+          <li>"인포그래픽 만들어줘"</li>
+          <li>"슬라이드를 만들어줘"</li>
+          <li>"동영상으로 만들고 싶어"</li>
+        </ul>
+      </div>
+      <div class="gnote">📊 슬라이드 프롬프트 가이드 — 그대로 복사해서 사용하세요.</div>
+      <div class="gtblwrap">
+      <table class="gtbl">
+        <tr><th style="width:13%">분류</th><th style="width:5%">№</th><th style="width:16%">슬라이드 주제</th><th>추천 프롬프트 (복사해서 사용)</th></tr>
+        <tr><td class="cat">💰 급여/수당</td><td class="no">①</td><td>정근수당 '실제 근무기간' 계산법</td><td><pre class="pp">휴직 후 복직한 공무원 및 신규 발령자의 정근수당 지급을 위한 '실제 근무기간(월)' 계산 방법을 설명하는 슬라이드를 만들어줘. ■ 형식: 3장 ■ 내용: 실제 근무기간 산정 기준 / 직위해제 및 휴직 기간 포함 여부 / 계산식 및 예시 ■ 참고자료: 「급여, 처음이어도 괜찮아」, 「달달한 매뉴얼」</pre><button class="copybtn">📋 복사</button></td></tr>
+        <tr><td class="cat">💰 급여/수당</td><td class="no">②</td><td>징계 공무원 수당 감액 기준</td><td><pre class="pp">징계를 받은 공무원의 각종 수당(정근수당, 가족수당 등) 감액 지급 기준을 정리한 슬라이드를 만들어줘. ■ 형식: 4장 ■ 내용: 견책·감봉·정직·강등·해임 등 징계 종류별 수당 감액 비율 / 직위해제 시 수당 감액 기준 표 ■ 참고자료: 「급여, 처음이어도 괜찮아」, 「달달한 매뉴얼」</pre><button class="copybtn">📋 복사</button></td></tr>
+        <tr><td class="cat">💰 급여/수당</td><td class="no">③</td><td>기간제교원 정근수당 지급 방식</td><td><pre class="pp">경기도교육청 소속 기간제교원의 정근수당 지급 방식 변경 사항과 지급 기준을 안내하는 슬라이드를 만들어줘. ■ 형식: 3장 ■ 내용: 1~2월 타 시·도 및 도내 학교 근무 실적 인정 여부 / 정근수당 계산식 / 주요 유의사항 ■ 참고자료: 「급여, 처음이어도 괜찮아」, 「제8편 보수」</pre><button class="copybtn">📋 복사</button></td></tr>
+        <tr><td class="cat">📋 호봉 획정</td><td class="no">④</td><td>학위·경력 중복 시 호봉 획정</td><td><pre class="pp">기간제교원 호봉을 획정할 때 학위 취득 기간과 근무(또는 군 복무) 경력이 중복될 경우의 인정 및 계산법을 설명하는 슬라이드를 만들어줘. ■ 형식: 3장 ■ 내용: 경력 중복 시 유리한 경력 1개 인정 원칙 / 관련 법령 규정 / 실제 적용 사례 ■ 참고자료: 「공문_계약제교원운영지침」</pre><button class="copybtn">📋 복사</button></td></tr>
+        <tr><td class="cat">📋 호봉 획정</td><td class="no">⑤</td><td>시간강사·조교 경력 환산법</td><td><pre class="pp">시간강사 경력이 중복되거나 대학 조교 경력이 있을 때의 경력 환산율과 계산법을 설명하는 실무 슬라이드를 만들어줘. ■ 형식: 4장 ■ 내용: 동일 기간 여러 학교 시간강사 합산 방법 / 대학 조교 환산율 / 객관적 증빙자료 목록 및 확인법 ■ 참고자료: 「급여, 처음이어도 괜찮아」</pre><button class="copybtn">📋 복사</button></td></tr>
+        <tr><td class="cat">👥 교육공무직</td><td class="no">⑥</td><td>2025년 임금 지급 기준 변경</td><td><pre class="pp">2025년 기준 교육공무직원과 특수운영직군의 임금 지급 기준 및 주요 변경 사항을 요약한 슬라이드를 만들어줘. ■ 형식: 4장 ■ 내용: 2025년 생활임금(12,500원) / 1, 2유형 기본급 인상액 / 정기상여금 등 주요 수당 변경 사항 표 ■ 참고자료: 「2025 교육공무직원 급여 매뉴얼」, 「제4편 교육공무직원 및 기타직」</pre><button class="copybtn">📋 복사</button></td></tr>
+        <tr><td class="cat">👥 교육공무직</td><td class="no">⑦</td><td>취업규칙상 징계 종류와 감경</td><td><pre class="pp">취업규칙에 명시된 교육공무직원의 징계 종류와 감경 기준을 요약한 슬라이드를 만들어줘. ■ 형식: 3장 ■ 내용: 징계의 종류(견책, 감봉, 정직, 해고) / 징계 양정 기준 / 징계 감경 사유 및 실무 주의사항 ■ 참고자료: 「취업규칙모음」</pre><button class="copybtn">📋 복사</button></td></tr>
+        <tr><td class="cat">👥 교육공무직</td><td class="no">⑧</td><td>결원대체 인력 신규 채용 절차</td><td><pre class="pp">교육공무직원 결원대체 인력을 신규 채용할 때의 필수 확인 및 처리 절차를 안내하는 슬라이드를 만들어줘. ■ 형식: 4장 ■ 내용: 결격사유(성범죄, 아동학대 등) 조회 절차 / 채용 시 필수 제출 서류 목록 / 나이스(NEIS) 등재 및 보고 순서 ■ 참고자료: 「채용_지침규정모음」</pre><button class="copybtn">📋 복사</button></td></tr>
+        <tr><td class="cat">🎁 복지·NEIS</td><td class="no">⑨</td><td>맞춤형 복지 변경·월할 계산</td><td><pre class="pp">맞춤형 복지제도의 주요 변경 사항과 복지점수 월할 계산 기준을 안내하는 슬라이드를 만들어줘. ■ 형식: 3장 ■ 내용: 2025년 기본 복지점수 인상 내용 / 신분 변동(신규, 휴직, 퇴직 등) 시 복지점수 월할 계산 공식 및 예시 ■ 참고자료: 「맞춤형복지_3종합본」</pre><button class="copybtn">📋 복사</button></td></tr>
+        <tr><td class="cat">🎁 복지·NEIS</td><td class="no">⑩</td><td>나이스 맞춤형 복지 처리 순서</td><td><pre class="pp">타 시·도 전입 및 신규 발령 공무원의 맞춤형 복지 단체보험 가입 및 복지포인트 배정을 위한 나이스 처리 순서 슬라이드를 만들어줘. ■ 형식: 4장 ■ 내용: 맞춤형복지포털 로그인 ⇨ 기관운영 ⇨ 인사변동 관리 ⇨ 휴복직 및 전출입 처리 시스템 화면 순서 ■ 참고자료: 「급여, 처음이어도 괜찮아」</pre><button class="copybtn">📋 복사</button></td></tr>
+        <tr><td class="cat">🎁 복지·NEIS</td><td class="no">⑪</td><td>나이스 급여 작업 월별 순서</td><td><pre class="pp">나이스(NEIS) 일반행정 시스템을 이용한 급여 작업 순서를 초보자가 확인하기 좋게 요약한 슬라이드를 만들어줘. ■ 형식: 5장 ■ 내용: 기초자료 생성 ⇨ 수당 및 공제자료 입력 ⇨ 대상자 생성 ⇨ 실적이력 생성 및 기안 ⇨ 마감까지의 전체 흐름도 ■ 참고자료: 「급여, 처음이어도 괜찮아」</pre><button class="copybtn">📋 복사</button></td></tr>
+      </table>
+      </div>
+      </div>
+      <div class="linkrow"><a class="btn gold" href="step5.html">STEP 5 · 노트북LM 실습으로 이어가기 →</a></div>
+    </section>
+
+    <footer>
+      <div class="gline"></div>
+      A.I라는 키 · 성장단계별 맞춤형연수(6급 승진자) · STEP 4 노트북LM 기본 &nbsp;|&nbsp; FlowDX 이애진
+    </footer>
+  </main>
+</div>
+<script>
+  document.querySelectorAll('.copybtn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var pre=btn.parentElement.querySelector('pre');
+      navigator.clipboard.writeText(pre.innerText).then(function(){
+        var o=btn.innerText;btn.innerText='✓ 복사됨';btn.classList.add('done');
+        setTimeout(function(){btn.innerText=o;btn.classList.remove('done');},1600);
+      });
+    });
+  });
+  document.querySelectorAll('nav.toc a').forEach(function(a){
+    a.addEventListener('click',function(e){var t=document.querySelector(a.getAttribute('href'));if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth'});}});
+  });
+</script>
+</body>
+</html>
+                                                                                                                                                                                                                                                                                                                                          

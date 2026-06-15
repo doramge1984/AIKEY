@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A.I라는 키 · 🎁 선물</title>
+<style>
+  :root{
+    --gold:#bfa05f; --gold-soft:#d9c79b; --gold-bg:#f7f2e7;
+    --navy:#23303f; --navy2:#33475c; --ink:#2c333b; --gray:#6b7480;
+    --line:#e7e3da; --bg:#f6f6f4; --code:#26303c; --grid:#e9eef3;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;color:var(--ink);background:var(--bg);line-height:1.7;padding-top:58px;font-size:25px;
+    font-family:"Malgun Gothic","맑은 고딕",-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;}
+  a{color:var(--navy2)}
+  p,li{font-size:25px;}
+  .topbar{position:fixed;top:0;left:0;right:0;height:58px;z-index:200;display:flex;align-items:center;
+    justify-content:space-between;padding:0 22px;background:rgba(255,255,255,.93);
+    backdrop-filter:blur(8px);border-bottom:1px solid var(--line);box-shadow:0 1px 8px rgba(35,48,63,.05);}
+  .tb-brand{font-weight:800;color:var(--navy);text-decoration:none;font-size:17px;}
+  .tb-brand span{color:var(--gold);}
+  .tb-links{display:flex;gap:5px;flex-wrap:wrap;align-items:center;}
+  .tb-links a{font-size:13px;color:var(--ink);text-decoration:none;padding:7px 11px;border:1px solid var(--gold-soft);border-radius:7px;font-weight:600;}
+  .tb-links a:hover{background:var(--gold-bg);color:var(--navy);}
+  .tb-links a.active{color:#fff;background:var(--gold);}
+  .wrap{display:flex;max-width:1480px;margin:0 auto;}
+  nav.toc{position:sticky;top:58px;align-self:flex-start;width:284px;height:calc(100vh - 58px);
+    padding:30px 16px;border-right:1px solid var(--line);background:#fbfaf8;overflow-y:auto;flex:none;margin-right:38px;}
+  nav.toc .brand{font-size:28px;font-weight:800;color:var(--navy);}
+  nav.toc .brand span{color:var(--gold)}
+  nav.toc .sub{font-size:18px;color:var(--gray);margin-bottom:18px;}
+  nav.toc .divider{height:1px;background:var(--gold-soft);margin:0 0 16px;}
+  nav.toc h2{font-size:18px;color:var(--gold);font-weight:800;letter-spacing:.06em;margin:0 0 10px;}
+  nav.toc a{display:block;padding:8px 12px;border:1px solid var(--line);background:#fff;border-radius:9px;color:var(--navy2);text-decoration:none;font-size:18px;margin-bottom:6px;transition:border-color .12s,background .12s;}
+  nav.toc a:hover{border-color:var(--gold);background:var(--gold-bg);color:var(--navy);}
+  main{flex:1;min-width:0;padding:0 0 80px;}
+  header.hero{position:relative;overflow:hidden;padding:54px 22px 48px;border-bottom:3px solid var(--gold);background:
+      repeating-linear-gradient(0deg,rgba(255,255,255,.03) 0 1px,transparent 1px 42px),
+      repeating-linear-gradient(90deg,rgba(255,255,255,.03) 0 1px,transparent 1px 42px),
+      radial-gradient(ellipse at 28% 22%, #2d3f58 0%, #1c2836 55%, #131b25 100%);}
+  header.hero::before{content:"";position:absolute;top:-34%;left:4%;width:520px;max-width:72%;height:360px;border-radius:50%;
+    background:radial-gradient(ellipse,rgba(191,160,95,.26),rgba(191,160,95,.07) 45%,transparent 72%);filter:blur(10px);pointer-events:none;animation:auraGlow 4.5s ease-in-out infinite;}
+  header.hero > *{position:relative;z-index:1;}
+  header.hero .keyicon{font-size:36px;color:#e7cf95;filter:drop-shadow(0 0 14px rgba(214,184,110,.6));animation:goldGlow 3.6s ease-in-out infinite;}
+  header.hero .tag{display:inline-block;border:1px solid rgba(217,199,155,.45);color:#ecdcb2;background:rgba(255,255,255,.06);padding:6px 15px;border-radius:999px;font-size:19px;margin-bottom:16px;}
+  header.hero h1{margin:0;font-size:40px;line-height:1.22;font-weight:800;letter-spacing:-.01em;
+    background:linear-gradient(180deg,#fbeec2,#ecd396 40%,#c8a865 70%,#a07f3d);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
+    filter:drop-shadow(0 2px 14px rgba(191,160,95,.5));}
+  header.hero h1 span{color:#b4c0cd !important;-webkit-text-fill-color:#b4c0cd !important;font-size:20px !important;}
+  .hr-gold{width:74px;height:2px;margin:18px 0;border:0;background:linear-gradient(90deg,var(--gold),transparent);box-shadow:0 0 12px rgba(191,160,95,.7);}
+  header.hero .meta{font-size:23px;color:#cdd6e2;}
+  header.hero .meta b{color:#ecdcb2}
+  section{padding:64px 22px;border-bottom:1px solid var(--line);border-top:3px solid var(--gold-soft);background:#fff;}
+  .step-badge{display:inline-block;font-size:25px;font-weight:800;letter-spacing:.14em;color:#fff;
+    background:var(--gold);padding:6px 16px;border-radius:999px;margin-bottom:14px;box-shadow:0 2px 6px rgba(191,160,95,.3);}
+  section h3{font-size:41px;margin:0 0 6px;color:var(--navy);font-weight:800;line-height:1.25;}
+  .underline{width:46px;height:2px;background:var(--gold-soft);margin:0 0 16px;}
+  .lead{font-size:28px;color:var(--gray)}
+  .ktable{width:100%;border-collapse:collapse;margin:14px 0;background:#fff;border-radius:11px;overflow:hidden;box-shadow:0 5px 14px rgba(191,160,95,.12);}
+  .ktable th{background:linear-gradient(135deg,#c6a766,#a8893f);color:#fff;text-align:left;padding:13px 16px;font-size:21px;}
+  .ktable td{padding:13px 16px;border-bottom:1px solid #f1ebda;vertical-align:top;font-size:21px;}
+  .ktable tr:last-child td{border-bottom:0;}
+  .kbd{display:inline-block;background:#23303f;color:#fff;border-radius:7px;padding:4px 12px;font-weight:700;font-size:19px;white-space:nowrap;font-family:"Consolas",monospace;}
+  .sitecard{display:flex;align-items:center;gap:16px;background:#fff;border:1px solid var(--gold-soft);border-left:7px solid var(--gold);border-radius:12px;padding:18px 22px;margin:12px 0;text-decoration:none;box-shadow:0 5px 14px rgba(191,160,95,.14);transition:transform .12s,box-shadow .12s;}
+  .sitecard:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(191,160,95,.26);}
+  .sitecard .ico{font-size:34px;flex:none;}
+  .sitecard .txt{flex:1;min-width:0;}
+  .sitecard .nm{font-size:25px;font-weight:800;color:var(--navy);margin:0;}
+  .sitecard .url{font-size:18px;color:var(--gray);margin:2px 0 0;word-break:break-all;}
+  .sitecard .go{flex:none;color:var(--gold);font-weight:800;font-size:24px;}
+  footer{padding:28px 22px;color:var(--gray);font-size:20px;}
+  footer .gline{height:1px;background:var(--gold-soft);margin-bottom:14px;}
+  @keyframes goldGlow{0%,100%{filter:drop-shadow(0 2px 12px rgba(191,160,95,.35));}50%{filter:drop-shadow(0 2px 24px rgba(224,195,122,.65));}}
+  @keyframes auraGlow{0%,100%{opacity:.5;}50%{opacity:.9;}}
+  @media(max-width:860px){ nav.toc{display:none} }
+  @media(max-width:720px){ .topbar{height:auto;flex-direction:column;align-items:flex-start;gap:6px;padding:8px 16px;} body{padding-top:104px;} }
+  @media(min-width:861px){ header.hero{padding-left:50px;} main section{padding-left:50px;} }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a class="tb-brand" href="index.html">A.<span>I</span>라는 키</a>
+  <nav class="tb-links">
+    <a href="index.html">🏠 홈</a>
+    <a href="step1.html">STEP 1 · AI 사용법</a>
+    <a href="step2.html">STEP 2 · 할루시네이션·RAG</a>
+    <a href="step3.html">STEP 3 · GEM 챗봇</a>
+    <a href="step4.html">STEP 4 · 노트북LM 기본</a>
+    <a href="step5.html">STEP 5 · 노트북LM 실습</a>
+    <a href="step6.html">STEP 6 · 프롬프트</a>
+    <a class="active" href="gift.html">🎁 선물</a>
+  </nav>
+</div>
+
+<div class="wrap">
+  <nav class="toc">
+    <div class="divider"></div>
+    <h2>🎁 선물</h2>
+    <a href="#keys">⌨️ 크롬 단축키</a>
+    <a href="#sites">🔗 유용한 사이트</a>
+    <a href="#ext" style="background:var(--gold);color:#fff;font-weight:800">🧩 크롬 확장 프로그램</a>
+  </nav>
+
+  <main>
+    <header class="hero">
+      <div class="keyicon">🎁</div>
+      <h1>🎁 선물 <span style="font-size:19px;color:var(--gray);font-weight:600;">— 알아두면 좋은 실무 꿀팁 모음</span></h1>
+      <hr class="hr-gold">
+      <p class="meta">연수에서 바로 써먹는 작은 선물들을 모았어요. 앞으로 자료가 더 추가됩니다.</p>
+    </header>
+
+    <section id="keys">
+      <div class="step-badge">⌨️ 단축키</div>
+      <h3>알아두면 편한 <span style="color:var(--gold)">크롬 단축키</span></h3>
+      <div class="underline"></div>
+      <table class="ktable">
+        <tr><th style="width:22%">단축키</th><th style="width:30%">기능</th><th>활용 팁</th></tr>
+        <tr><td><span class="kbd">Ctrl + H</span></td><td>방문 기록(History) 열기</td><td>이전에 방문했던 사이트를 빠르게 찾을 때 유용합니다.</td></tr>
+        <tr><td><span class="kbd">Ctrl + Shift + T</span></td><td>닫은 탭 다시 열기</td><td>실수로 창을 닫았을 때 당황하지 마세요! 여러 번 누르면 순차적으로 되살아납니다.</td></tr>
+        <tr><td><span class="kbd">Ctrl + Shift + B</span></td><td>북마크바 표시/숨기기</td><td>화면을 넓게 써야 할 때 숨기는 '화면 다이어트' 필수 기능입니다.</td></tr>
+        <tr><td><span class="kbd">Ctrl + Shift + V</span></td><td>서식 없이 붙여넣기</td><td>웹사이트의 글꼴·색상을 무시하고 텍스트만 깔끔하게 붙여넣습니다.</td></tr>
+        <tr><td><span class="kbd">Shift + Enter</span></td><td>프롬프트 창 내 줄바꿈</td><td>전송하지 않고 다음 줄로 넘어갈 때 사용합니다.</td></tr>
+      </table>
+    </section>
+
+    <section id="sites">
+      <div class="step-badge">🔗 사이트</div>
+      <h3>알아두면 좋은 <span style="color:var(--gold)">유용한 사이트</span></h3>
+      <div class="underline"></div>
+
+      <h4 style="font-size:26px;color:var(--navy);font-weight:800;margin:8px 0 6px">🌐 웹사이트</h4>
+      <a class="sitecard" href="https://donue.co.kr/service/signature/" target="_blank" rel="noopener">
+        <span class="ico">✍️</span>
+        <span class="txt"><p class="nm">무료 전자서명·도장 만들기</p><p class="url">donue.co.kr/service/signature/</p></span>
+        <span class="go">→</span>
+      </a>
+      <a class="sitecard" href="https://workspace.google.com/labs-sign-up/join" target="_blank" rel="noopener">
+        <span class="ico">🧪</span>
+        <span class="txt"><p class="nm">구글 실험실 (Workspace Labs)</p><p class="url">workspace.google.com/labs-sign-up/join</p></span>
+        <span class="go">→</span>
+      </a>
+      <a class="sitecard" href="https://www.ilovepdf.com/ko" target="_blank" rel="noopener">
+        <span class="ico">📄</span>
+        <span class="txt"><p class="nm">아이러브PDF — PDF 합치기·분할·압축·변환</p><p class="url">ilovepdf.com/ko</p></span>
+        <span class="go">→</span>
+      </a>
+      <a class="sitecard" href="https://dashboard.blaze.today/" target="_blank" rel="noopener">
+        <span class="ico">⚡</span>
+        <span class="txt"><p class="nm">Blaze (Text Blaze) — 자주 쓰는 문장·문단·주소·이메일 답변을 단축어로 저장</p><p class="url">dashboard.blaze.today</p></span>
+        <span class="go">→</span>
+      </a>
+
+      <h4 id="ext" style="font-size:26px;color:var(--navy);font-weight:800;margin:32px 0 6px">🧩 크롬 확장 프로그램</h4>
+      <a class="sitecard" href="https://chromewebstore.google.com/detail/adguard-adblocker/bgnkhhnnamicmpeenaelnjfhikgbkllg" target="_blank" rel="noopener">
+        <span class="ico">🛡️</span>
+        <span class="txt"><p class="nm">AdGuard 광고차단기</p><p class="url">chromewebstore.google.com/detail/adguard-adblocker</p></span>
+        <span class="go">→</span>
+      </a>
+      <a class="sitecard" href="https://chromewebstore.google.com/detail/qr-code-generator/afpbjjgbdimpioenaedcjgkaigggcdpp" target="_blank" rel="noopener">
+        <span class="ico">🔳</span>
+        <span class="txt"><p class="nm">QR 코드 제너레이터</p><p class="url">chromewebstore.google.com/detail/qr-code-generator</p></span>
+        <span class="go">→</span>
+      </a>
+      <a class="sitecard" href="https://chromewebstore.google.com/detail/allow-copy-+/ajhbdcgfhlhhmocddefknjjkejcfpbnj" target="_blank" rel="noopener">
+        <span class="ico">📋</span>
+        <span class="txt"><p class="nm">복사 허용 (Allow Copy+)</p><p class="url">chromewebstore.google.com/detail/allow-copy-+</p></span>
+        <span class="go">→</span>
+      </a>
+      <a class="sitecard" href="https://chromewebstore.google.com/detail/joois-quickshortener-%EC%9B%B9%EC%9D%98-%EA%B8%B8/mnnhpnpnocjcngehebnfjocjbbddcbfd" target="_blank" rel="noopener">
+        <span class="ico">🔗</span>
+        <span class="txt"><p class="nm">Joois QuickShortener — 단축주소 만들기</p><p class="url">chromewebstore.google.com/detail/joois-quickshortener</p></span>
+        <span class="go">→</span>
+      </a>
+      <a class="sitecard" href="https://chromewebstore.google.com/detail/bitly-short-links-and-qr/iabeihobmhlgpkcgjiloemdbofjbdcic" target="_blank" rel="noopener">
+        <span class="ico">🔗</span>
+        <span class="txt"><p class="nm">Bitly — 단축주소·QR 만들기</p><p class="url">chromewebstore.google.com/detail/bitly-short-links-and-qr</p></span>
+        <span class="go">→</span>
+      </a>
+    </section>
+
+    <section style="border:0;background:radial-gradient(ellipse at 50% 30%, #2d3f58 0%, #1c2836 60%, #131b25 100%);text-align:center;padding:80px 22px">
+      <p style="font-size:34px;font-weight:800;line-height:1.5;margin:0 0 18px;background:linear-gradient(180deg,#fbeec2,#ecd396 45%,#c8a865 75%,#a07f3d);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;filter:drop-shadow(0 2px 14px rgba(191,160,95,.5))">낯선 변화 앞에서<br>기꺼이 버튼을 눌러본 당신,<br>오늘 누구보다 앞서갔습니다.</p>
+      <p style="font-size:24px;color:#ecdcb2;font-weight:700;margin:0">응원합니다</p>
+    </section>
+
+    <div style="height:150px"></div>
+
+    <style>
+      @keyframes giftGoldGlow{0%,100%{text-shadow:0 0 14px rgba(191,160,95,.4),0 0 30px rgba(191,160,95,.22);}50%{text-shadow:0 0 26px rgba(214,184,110,.85),0 0 56px rgba(214,184,110,.5);}}
+      .giftcontact a.gfill{text-decoration:none;background:linear-gradient(135deg,#d6b86e,#a8893f);color:#fff;font-weight:800;font-size:17px;padding:13px 26px;border-radius:999px;box-shadow:0 6px 20px rgba(191,160,95,.45);transition:transform .12s,box-shadow .12s;}
+      .giftcontact a.gfill:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(214,184,110,.6);}
+      .giftcontact a.gline{text-decoration:none;background:#fff;color:#8a6d2e;border:2px solid #d6b86e;font-weight:800;font-size:17px;padding:13px 26px;border-radius:999px;box-shadow:0 4px 14px rgba(191,160,95,.22);transition:transform .12s,box-shadow .12s;}
+      .giftcontact a.gline:hover{transform:translateY(-2px);background:#fffdf5;box-shadow:0 8px 22px rgba(191,160,95,.4);}
+    </style>
+    <section class="giftcontact" style="border:0;background:
+        radial-gradient(ellipse at 50% 0%, rgba(214,184,110,.30), transparent 60%),
+        linear-gradient(180deg,#fffdf6,#f7f2e7);
+        text-align:center;padding:88px 22px 80px;border-top:4px solid #bfa05f;margin-top:40px">
+      <div style="display:inline-block;border:1px solid #d9c79b;color:#8a6d2e;background:#fff;padding:6px 18px;border-radius:999px;font-size:15px;letter-spacing:.14em;font-weight:700;margin-bottom:18px;box-shadow:0 4px 14px rgba(191,160,95,.25)">✦ CONTACT ✦</div>
+      <h2 style="margin:0 0 10px;font-size:38px;font-weight:800;color:#a8893f;animation:giftGoldGlow 2.6s ease-in-out infinite">강연 및 연수 문의</h2>
+      <p style="color:#6b7480;font-size:19px;margin:0 0 28px">교직원연수 · 공무원연수 · 학부모 강연 · 기관 출강 문의를 환영합니다.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:13px;justify-content:center;max-width:1000px;margin:0 auto">
+        <a class="gfill" href="mailto:ai@flowdx.kr">✉️ AI@FLOWDX.KR</a>
+        <a class="gfill" href="tel:01023198419">📞 010-2319-8419</a>
+        <a class="gline" href="https://flowdx.kr/" target="_blank" rel="noopener">🌐 FLOWDX.KR</a>
+        <a class="gline" href="https://capable-tarsier-97affe.netlify.app/" target="_blank" rel="noopener">🖼️ 웹 포트폴리오</a>
+      </div>
+    </section>
+
+    <footer>
+      <div class="gline"></div>
+      A.I라는 키 · 성장단계별 맞춤형연수(6급 승진자) · 🎁 선물 &nbsp;|&nbsp; FlowDX 이애진
+    </footer>
+  </main>
+</div>
+</body>
+</html>
